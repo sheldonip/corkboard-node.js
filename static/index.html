@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <!--<link href='http://fonts.googleapis.com/css?family=The+Girl+Next+Door' rel='stylesheet' type='text/css'>-->
+        <link href="/css/reset.css" rel="stylesheet">
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="/css/corkboard.css" rel="stylesheet">
+        <title>Cork board</title>   
+    </head>
+    <body>
+        <div id="main-wrapper">
+        	
+            <!-- Fetch each notepaper from notepaper table --> 
+			<a id="note-1" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-2" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-3" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-4" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a> 
+
+			<a id="note-5" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-6" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-7" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+			
+			<a id="note-8" class="note note-while col-lg-3">
+				<div class="pin"></div>
+				<div class="content-container">
+				</div>
+			</a>
+                
+            <a class="qr-label">
+               	<div class="text">
+               		Want to Post ?
+               	</div>
+               	
+        		<img class="notepaper-qrCode" src="">
+        		
+        		<div class="text">
+               		Scan here -->
+               	</div>
+        	</a>
+                
+        </div><!-- End of wrapper -->
+        <div>
+        	
+        </div>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="/js/jquery-1.10.2.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="/js/bootstrap.min.js"></script>
+		
+		<!-- Socket.io -->
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		<!-- Custom js -->
+		<script src="/js/create.js"></script>		
+		<script src="/js/baseurl.js"></script>
+        <script>
+			Create.initialize(base_url);
+		
+        	var lastUpdateTime;
+			var notepaper;        	
+        	      	
+            $( document ).ready(function() {
+            	lastUpdateTime = "";
+                $(".album ul li:first-child").animate({opacity: 1.0}, 800);
+                $(".album ul li:not(:first-child)").animate({opacity: 0.0}, 800);
+                
+                var player = $("#ytplayers-1");
+                //player.mute();
+                
+                setInterval(function() {
+					$('.album ul').each(function(){
+							var firstLi = $(this).children('li').first().detach(); // Remove the first element
+							$(this).append(firstLi); // Add it back to the end
+							$(this).children('li:first-child').animate({opacity: 1.0}, 800);
+							$(this).children('li:not(:first-child)').animate({opacity: 0.0}, 800);
+						}
+					);
+                }, 3000);
+            });
+			
+			function updateMessages() {
+					console.log("[DEBUG] updateMessages() called");					
+					var content;
+					var notepaperInner = [];
+					$.ajax({
+					url: base_url + 'process/updateMessages',
+					type: "GET",
+					data: { lastUpdateTime: lastUpdateTime },
+					dataType: "json",
+					success: function(data) {						
+						data.notepapers = JSON.parse(data.notepapers);
+						
+						if(data.notepapers != null){							
+							for(var i=0 ; notepaper = data.notepapers[i] ; i++){
+								console.log('[DEBUG]');
+								console.dir(notepaper);
+								console.log('[DEBUG] notepaper.type: ' + notepaper.type);
+								
+								content = JSON.parse(notepaper.content);								
+								$('#note-'+notepaper.id).find('.content-container').empty();
+								
+								if(notepaper.type==1){
+									
+									//notepaperInner.push('<div class="image-title">'+content.title+'</div>');
+									notepaperInner.push('<div class="text">'+content.content+'</div>');
+																	
+								} else if(notepaper.type==2){
+									
+									//notepaperInner.push('<div class="image">');
+									notepaperInner.push('<img class="notepaper-img" src="'+base_url+'uploads/resized/'+ content.img +'">');
+									notepaperInner.push('<div class="text">'+content.content+'</div>');
+									//notepaperInner.push('</div>');
+									
+								} else if(notepaper.type==3){
+									
+									notepaperInner.push('<div id="album-1" class="album">');
+									notepaperInner.push('<ul>');
+									
+									for(var j = 0; j < content.img.length; j++){
+										notepaperInner.push('<li>');
+										notepaperInner.push('<div id="album-1-1">');
+										notepaperInner.push('<img class="notepaper-img" src="'+ base_url +'uploads/resized/'+ content.img[j] +'">');
+										notepaperInner.push('</div>');
+										notepaperInner.push('</li>');
+									}
+									
+									notepaperInner.push('</ul>');
+								   notepaperInner.push('</div>');
+								   notepaperInner.push('<div class="text">'+content.content+'</div>');
+								   
+								} else if(notepaper.type==4){
+									
+									notepaperInner.push('<div class="notepaper-youtube">');
+									notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+content.videoId+'?autoplay=1&controls=0&loop=1&playlist='+content.videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
+									notepaperInner.push('</div>');
+									notepaperInner.push('<div class="text">'+content.content+'</div>');
+									
+								} else if(notepaper.type==5){
+									
+									notepaperInner.push('<video class="notepaper-video" autoplay loop muted>');
+									notepaperInner.push('<source src="'+ base_url +'uploads/video/'+content.video+'" type="video/mp4">');                  
+									notepaperInner.push('</video>');
+									notepaperInner.push('<div class="text">'+content.content+'</div>');
+																	
+								} else if(notepaper.type==6){
+									notepaperInner.push('<img class="canvas-img" src="'+base_url+'uploads/canvas/'+content.img+'">');
+									notepaperInner.push('<div class="text">'+content.content+'</div>');
+									
+								} else { // the message is expired or deleted
+									//notepaperInner.push('<img class="notepaper-qrCode" src="'+ base_url +'img/qrcode/' + qrUrls[notepaper.notepaper_id] + '">');
+								}
+								
+								$('#note-'+notepaper.id).find('.content-container').html(notepaperInner.join(''));
+								
+								
+								notepaperInner = [];
+							}
+							
+						} else {
+							console.log("no new message.");
+						}
+						
+						// What's that?
+						lastUpdateTime = data.time;
+						console.log('[DEBUG] data.time: ' + data.time);
+						
+					},
+	  
+					error: function() {
+						console.log("ERROR!!!");
+					}
+				});
+				}updateMessages();
+        </script>
+    </body>
+</html>

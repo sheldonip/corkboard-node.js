@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <!--<link href='http://fonts.googleapis.com/css?family=The+Girl+Next+Door' rel='stylesheet' type='text/css'>-->
+        <link href="/css/reset.css" rel="stylesheet">
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="/css/corkboard.css" rel="stylesheet">
+        <title>Cork board - Choose Message Position</title>   
+    </head>
+    <body>
+        <div id="choose-wrapper">
+        	<h1 class="choose">Please Choose Notepaper</h1>
+            <!-- Fetch each notepaper from notepaper table by updateNotepapers() -->
+                
+        </div><!-- End of wrapper -->
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="/js/jquery-1.10.2.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="/js/bootstrap.min.js"></script>
+		
+		<script src="/js/baseurl.js"></script>
+		<script>
+			function updateNotepapers() {
+				var notepaperInner = [];
+				$.ajax({
+					url: base_url + 'process/updateNotepapers',
+					type: "GET",
+					dataType: "json",
+					success: function(data) {
+						data = JSON.parse(data);
+						console.dir(data);
+						
+						for(var i=0; i<data.length; i++){
+							console.log('[DEBUG] id: ' + i + '; occupied: ' + data[i].occupied);
+							if(data[i].occupied == 0){
+								notepaperInner.push("<a id=\"note-" + (i+1) + "\" class=\"note-thumb free\" href=\"/message/create/" + (i+1) + "\">");
+							} else {
+								notepaperInner.push("<a id=\"note-" + (i+1) + "\" class=\"note-thumb\">");
+							}
+							notepaperInner.push("<div class='content-container'><p class=\"choose\"><span class=\"glyphicon glyphicon-ok\"></span></p></div></a>");
+							
+							$('div#choose-wrapper').append(notepaperInner.join(''));
+							
+							notepaperInner = [];
+						}
+					},					
+					error: function() {
+						console.log("updateNotepapers() ERROR!!!");
+					}
+				});				
+			}updateNotepapers();
+		</script>
+
+    </body>
+</html>

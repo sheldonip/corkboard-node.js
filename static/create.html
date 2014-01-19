@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Cork board - Post Message</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="/css/reset.css" rel="stylesheet">
+        <!-- Bootstrap -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/css/corkboard.css" rel="stylesheet">
+        <link href="/css/sketch.css" rel="stylesheet" media="screen">
+        <link href="/css/spectrum.css" rel="stylesheet" media="screen">
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		<script src="../../assets/js/html5shiv.js"></script>
+		<script src="../../assets/js/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+	    <div id="wrapper" class="col-lg-12">
+	    
+        <h1>Post Message</h1>
+		<div class="imgholder">
+			<button type="button" id="uploadImgBtn" class="btn btn-primary btn-lg">
+				<span class="glyphicon glyphicon-camera"></span>
+			</button>
+			<button type="button" id="uploadVideoBtn" class="btn btn-success btn-lg">
+				<span class="glyphicon glyphicon-facetime-video"></span>
+			</button>
+			<button class="btn btn-info btn-lg" data-toggle="modal" data-target="#sketchModal">
+				<span class="glyphicon glyphicon-picture"></span>
+			</button>
+			<button class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
+			
+			<form id="galleryForm-1" class="galleryForm" action="" method="POST" enctype="multipart/form-data">
+				<input type="file" id="messageImg" name="messageGallery[]" accept="image/*" pattern="([^\s]+(?=\.(jpg|gif|png))\.\2)" multiple/>
+				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
+			</form>
+			
+			<form role="form" class="videoForm" action="/index.php/upload/uploadVideo" method="POST" enctype="multipart/form-data">
+				<input type="file" id="messageVideo" name="messageVideo" accept="video/*" pattern="([^\s]+(?=\.(mov|mpeg|mp4|avi|3gp))\.\2)" />
+				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
+			</form>
+			
+			<div class="progress" id="my-progress">
+                <div class="progress-bar" role="progressbar" style="width: 0%;"></div>
+            </div>
+		</div>
+		
+		<form id="msgForm" action="/index.php/message/update" role="form" method="post" accept-charset="utf-8">
+			<div class="form-group">
+				<textarea class="form-control" id="textContent" name="content" rows="3" required></textarea>
+			</div>
+			<div class="content-container">
+                <ul class="imgList table"></ul>
+                <ul class="videoList table"></ul>
+            </div>
+            <div class="form-group">
+            	<label for="type">Current Type:</label>
+            	<select class="form-control" name="type" id="type">
+					<option value="1" selected>Text</option>
+  					<option value="3">Photos</option>
+  					<option value="5">Video</option>
+  					<option value="6">Sketch</option>
+  					<option value="4">Youtube</option>
+				</select>
+            </div>
+			<input type="hidden" name="id" id="" value="<?php echo (int)$messageId; ?>" />
+			<input type="hidden" name="videoId" id="videoId" value="" />
+			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
+			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
+		</form>
+		
+        </div>
+        
+        
+        <div class="modal fade" id="youtubeModal" tabindex="-1" role="dialog" aria-labelledby="youtubeModalLabel" aria-hidden="true">
+  			<div class="modal-dialog">
+    			<div class="modal-content">
+      				<div class="modal-header">
+      					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        				<h4 class="modal-title" id="myModalLabel">Youtube</h4>
+      				</div>
+      				<div class="modal-body">
+        				<input type="text" class="form-control" name="youtubeUrl" id="youtubeUrl" placeholder="Paste the youtube url" />
+      					<div class="youtubeHolder"></div>
+      				</div>
+      				<div class="modal-footer">
+        				<button type="button" id="save-youtube" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+      				</div>
+    			</div><!-- /.modal-content -->
+  			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+        
+        
+        <div class="modal fade" id="sketchModal" tabindex="-1" role="dialog" aria-labelledby="sketchModalLabel" aria-hidden="true">
+  			<div class="modal-dialog">
+    			<div class="modal-content">
+      				<div class="modal-header">
+      					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        				<h4 class="modal-title" id="myModalLabel">Sketch</h4>
+      				</div>
+      				<div class="modal-body" id="canvas-holder">
+        					<div class="tools">
+        					</div>
+							<canvas id="sketchpad" width="270" height="296">
+							</canvas>
+						
+      				</div>
+      				<div id="canvas-footer" class="modal-footer">
+      					<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
+        				<button type="button" id="save-sketch" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+      				</div>
+    			</div><!-- /.modal-content -->
+  			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+        
+		<a href='#sketchpad' data-clear='true' id="real-clear-canvas">Clear</a>
+		
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="/js/jquery-1.10.2.js"></script>
+		<!-- For upload form of photo gallery -->
+		<script src="/js/jquery.form.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="/js/bootstrap.min.js"></script>		
+		
+		<!-- Socket.io -->
+		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+		
+		<!-- Custom js -->
+		<script src="/js/spectrum.js"></script>
+		<script src="/js/sketch.js"></script>	
+		<script src="/js/baseurl.js"></script>
+		<script src="/js/create.js"></script>
+
+		<script>
+			Create.initialize(base_url);
+			// Initialise forms
+			var message_id = parseInt(pathArray[5]);
+			$('form#msgForm input[name=\"notepaperId\"]').val(message_id);
+			$('form#galleryForm-1').attr('action',base_url+'upload/uploadGallery');
+			
+			//submit the message form every 3 seconds
+			//setInterval(function(){$('#msgForm').submit();},3000);
+			
+			//customize upload button
+			$('#uploadImgBtn').click(function(){
+        		// Simulate a click on the file input button
+        		// to show the file browser dialog
+       			$('#messageImg').click();
+    		});
+    		
+    		$('#uploadVideoBtn').click(function(){
+        		// Simulate a click on the file input button
+        		// to show the file browser dialog
+       			$('#messageVideo').click();
+    		});
+
+			//automatic upload after choosing the file
+			$( "#messageImg" ).on("change", function() {
+				$(this).parent().submit();
+			});
+			$( "#messageVideo" ).on("change", function() {
+				$(this).parent().submit();
+			});
+			
+			//upload the image of gallery
+  	
+  	/*$('body').on('submit', '.galleryForm', function(evt) {  		
+  		evt.preventDefault();
+  		var galleryForm = $(this);
+  		var imgList = $(this).parent().next().children('.content-container').children('.imgList');
+  		var filename = $(this).children('#messageImg').val().split('/').pop().split('\\').pop();
+  		var progressBar = $('#my-progress').children('.progress-bar');
+                 $(this).ajaxSubmit({                 	
+                    beforeSend: function() {
+                    	$('#my-progress').show();
+                        var progress = '0%';
+                        progressBar.css(
+							'width',
+							progress
+							);
+                    },
+                    uploadProgress: function(event, position, total, percentComplete) {
+                        var progress = percentComplete + '%';
+                        progressBar.css(
+						'width',
+						progress
+						);
+                    },
+                    complete: function(xhr) {
+                     	galleryForm.clearForm();
+                     	progressBar.width('0%');
+                     	var data = JSON.parse(xhr.responseText);                        	
+                     	if(data.status=="error"){
+                         	alert(data.msg);
+                        }else{
+                            for(var i=0; i < data.msg.length; i++){
+                                imgList.append('<li class="image"><div class="removeThumbnail">&times</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.msg[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.msg[i]+'" /></li>');
+                            }
+                            $('#type').val("3");
+                            $('#my-progress').hide();
+                            //$('#msgForm').submit();
+                             
+                        }
+                         	
+                    }
+					
+                 });
+    });*/
+    
+    
+    //upload the video
+    $('body').on('submit', '.videoForm', function(evt) {
+				evt.preventDefault();
+				var videoForm = $(this);
+				//var videoHolder = $(this).parent();
+				//var urlField = $(this).parent().next('.gridVideoForm').children('[name="url"]');
+				var videoList = $('.videoList');
+				var progressBar = $('#my-progress').children('.progress-bar');
+				$(this).ajaxSubmit({
+					beforeSend: function() {
+							$('#my-progress').show();
+							var progress = '0%';
+							progressBar.css('width',progress);
+						},
+						uploadProgress: function(event, position, total, percentComplete) {
+							var progress = percentComplete + '%';
+							progressBar.css('width',progress);
+						},
+						complete: function(xhr) {
+							var data = JSON.parse(xhr.responseText);
+							if(data.status=="error"){
+								alert(data.msg);
+							}else{
+								videoList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
+								$('#type').val("5");
+								$('#my-progress').hide();
+								$('#uploadVideoBtn').hide();
+								//$('#msgForm').submit();
+							}
+						}
+				});
+				return false;
+			});
+    
+    //submit the message
+    /*$('body').on('submit', '#msgForm', function(evt) {
+  		
+  		evt.preventDefault();
+  		$(this).ajaxSubmit({
+  			complete: function(xhr) {                  	
+                console.log("submitted message!");
+            }
+  		});
+  		
+    });*/
+    //remove the uploaded image of photo gallery
+    $('body').on('click', '.imgList .removeThumbnail', function(evt) {
+
+    		$(this).parent().remove();
+    		//$('#msgForm').submit();
+    		console.log("remove.");
+    	
+   	});   	
+   	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
+
+    		$(this).parent().remove();
+    		//$('#msgForm').submit();
+    		console.log("remove.");
+    		$('#uploadVideoBtn').show();
+    	
+   	});   
+   	
+   	//Paste Youtube URL
+   	$('body').on('change', '#youtubeUrl', function(evt) {
+    	var site= $(this).val();
+		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}((youtube\.com)|(youtu\.be))/g);
+		var holder = $(this).next();
+		var idField = $('#videoId');
+		
+		//if the input url is a valid youtube url and it is the first time for it to appear
+		if(match!=null && holder.children().length==0){
+				
+			$.ajax({
+ 				url: '<?php echo base_url();?>index.php/video/getYoutube/',
+				type: "GET",
+				data: { url: site },
+				dataType: "json",
+				success: function(data) {
+					if(data.status=="error"){
+						alert(data.msg);
+					} else {
+						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
+						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ data.thumbnail +'" /></div>');
+						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ data.id +'">' + data.title + '</a></h5></div>');
+						holder.append('<div class="youtubeDescription">'+data.description+'</div>');
+						// Update UI
+                        $('div.youtubeHolder').css('padding','2%');
+                        $('div.youtubeHolder').css('border','1px solid #CCCCCC');
+						
+						idField.attr('value', data.id);
+						//$('#textTitle').attr('value', data.title);
+						
+					}
+				},
+  
+				error: function() {
+					alert("ERROR!!!");
+				}
+			});
+			
+		}
+	});
+	
+	//remove the youtube holder
+	$('body').on('click', '.removeYoutube', function(evt) {
+	    // Update UI
+	    $('div.youtubeHolder').css('padding','0%');
+	    $('div.youtubeHolder').css('border','0');
+    	$(this).parent().children().remove();
+   	});
+   	
+   	//submit after save youtube url
+   	$("#save-youtube").on("click", function() {
+		$('#type').val("4");
+		//$('#msgForm').submit();
+	});
+	
+	//sketchpad
+	$(function() {
+    	$.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
+    		$('#canvas-holder .tools').append("<a href='#sketchpad' data-color='" + this + "' style='width: 30px; background: " + this + ";'></a> ");
+    	});
+    	$('#sketchpad').sketch();
+  	});
+  	
+  	$("#save-sketch").on("click", function(event ) {
+				event.preventDefault();
+				var canvasTest = document.getElementById('sketchpad');
+				var canvasData = canvasTest.toDataURL("image/png");
+				var imgList = $('.imgList');
+				$.ajax({
+					type : "POST",
+					url : "/index.php/upload/uploadCanvas",
+					data : {
+						imgData : canvasData//,
+						//<?php echo $this -> security -> get_csrf_token_name(); ?> : "<?php echo $this -> security -> get_csrf_hash(); ?>"
+					},
+					dataType : "json"
+				}).done(function(data) {
+					imgList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.msg +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.msg+'" /></li>');
+					$('#type').val("3");
+					$('#msgForm').submit();
+					canvasData = "";
+				});
+	});
+	
+	$("#clear-sketch").on("click", function(event ) {
+		event.preventDefault();
+		$('#real-clear-canvas').click();
+		var canvas = document.getElementById('sketchpad');
+		var context = canvas.getContext('2d');
+		context.clearRect(0,0,270,296);
+		sketch.clear();
+	});
+	
+	
+		</script>
+
+	</body>
+</html>
