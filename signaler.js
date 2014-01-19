@@ -6,6 +6,11 @@ var mysql = require('mysql');
 var im = require('imagemagick');
 var fs = require('fs');
 
+// Include the express body parser
+app.configure(function () {
+  app.use(express.bodyParser());
+});
+
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
@@ -19,25 +24,7 @@ server.listen(8080);
 io.sockets.on('connection', function (socket) {
 	socket.on('msg', function (data) {
 		io.sockets.emit('new', data);
-	});	
-	
-	socket.on('send-image', function (data) {
-		var fs = require('fs');
-
-        //path to store uploaded files (NOTE: presumed you have created the folders)
-        var fileName = __dirname + '/static/uploads/original/' + name;
-
-        fs.open(fileName, 'a', 0755, function(err, fd) {
-            if (err) throw err;
-
-            fs.write(fd, buffer, null, 'Binary', function(err, written, buff) {
-                fs.close(fd, function() {
-                    console.log('File saved successful!');
-                });
-            })
-        });
-	});	
-	
+	});		
 });
 
 app.use("/css/", express.static(__dirname + '/static/css'));
@@ -84,32 +71,37 @@ app.get('/process/updateMessages', function (req, res) {
 	});	
 });
 
+// ----------------------------------uploads' logic
+
 app.post('/upload/uploadgallery', function (req, res) {
-    fs.readFile(req.files.image.path, function (err, data) {
-		var imageName = req.files.image.name;
+	var objToJson = {};
+    fs.readFile(req.files.messageImg.path, function (err, data) {	
+		var imageName = req.files.messageImg.name;
 
 		// If there's an error
 		if(!imageName){
 			console.log("There was an error");
-			res.redirect("/");
 			res.end();
 		} else {
-			var newPath = __dirname + "/static/uploads/original/" + imageName;
-			var thumbPath = __dirname + "/static/uploads/thumbs/" + imageName;
+			var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
+			var thumbPath = __dirname + "\\static\\uploads\\resized\\" + imageName;			
+			objToJson.status = 'error';
 			// write file to uploads/fullsize folder
-			fs.writeFile(newPath, data, function (err) {			
+			fs.writeFile(newPath, data, function (err) {
 				// write file to uploads/thumbs folder
 				im.resize({
 					srcPath: newPath,
 					dstPath: thumbPath,
-					width:   200
+					width: 128
 				}, function(err, stdout, stderr){
 					if (err) throw err;
-					console.log('resized image to fit within 200x200px');
+					console.log('resized image to fit within 128x128px');
+					objToJson.imageName = imageName;
+					objToJson.status = 'ok';
+					// return JSON response
+					res.json(objToJson);
 				});
 				
-				res.redirect("/uploads/fullsize/" + imageName);
-
 			});
 		}
 	});

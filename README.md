@@ -23,6 +23,10 @@ image: `/static/img/`
 
 js: `/static/js/`
 
+### Post messages
+URL + `/message/choosepos`
+
+
 Corkboard Backend
 ---
 ### Deploy
@@ -30,12 +34,22 @@ Corkboard Backend
 node signaler.js
 ```
 
+### signaler.js
+ * Contains server logic
+
 ### baseurl.js
-Fetch base url and store into `base_url`
+ * Fetches base url and store into `base_url`
 
+### create.js
+ * Defines how messages are sent and handled
+ * Creates message based on html form and local storage
 
+### convert.exe & identify.exe 
+ * Used by node-imagemagick
+ 
 Reference
 ---
  * [Simple Chat - Node.js + WebSockets](http://tech.pro/tutorial/1097/simple-chat-nodejs-plus-websockets)
  * [node-mysql](https://github.com/felixge/node-mysql)
  * [QRCode.js](http://davidshimjs.github.io/qrcodejs/)
+ * [node-imagemagick](https://github.com/rsms/node-imagemagick)

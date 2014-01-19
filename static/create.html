@@ -32,8 +32,9 @@
 			</button>
 			<button class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
 			
+			<!-- ***TO-DO: Handle multiple images -->
 			<form id="galleryForm-1" class="galleryForm" action="" method="POST" enctype="multipart/form-data">
-				<input type="file" id="messageImg" name="messageGallery[]" accept="image/*" pattern="([^\s]+(?=\.(jpg|gif|png))\.\2)" multiple/>
+				<input type="file" id="messageImg" name="messageImg" accept="image/*" pattern="([^\s]+(?=\.(jpg|gif|png))\.\2)"/>
 				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
 			</form>
 			
@@ -67,6 +68,7 @@
             </div>
 			<input type="hidden" name="id" id="" value="<?php echo (int)$messageId; ?>" />
 			<input type="hidden" name="videoId" id="videoId" value="" />
+			<input type="hidden" name="imagesName" id="imagesName" value="" />
 			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
 		</form>
@@ -138,7 +140,7 @@
 			// Initialise forms
 			var message_id = parseInt(pathArray[5]);
 			$('form#msgForm input[name=\"notepaperId\"]').val(message_id);
-			$('form#galleryForm-1').attr('action',base_url+'upload/uploadGallery');
+			$('form#galleryForm-1').attr('action', base_url+'upload/uploadGallery');
 			
 			//submit the message form every 3 seconds
 			//setInterval(function(){$('#msgForm').submit();},3000);
@@ -164,9 +166,9 @@
 				$(this).parent().submit();
 			});
 			
-			//upload the image of gallery
-  	
-  	/*$('body').on('submit', '.galleryForm', function(evt) {  		
+			//upload the image of gallery  	
+  	$('body').on('submit', '.galleryForm', function(evt) {  	
+		console.log('[DEBUG] .galleryForm submitting...');
   		evt.preventDefault();
   		var galleryForm = $(this);
   		var imgList = $(this).parent().next().children('.content-container').children('.imgList');
@@ -191,35 +193,38 @@
                     complete: function(xhr) {
                      	galleryForm.clearForm();
                      	progressBar.width('0%');
-                     	var data = JSON.parse(xhr.responseText);                        	
+                     	var data = JSON.parse(xhr.responseText);
                      	if(data.status=="error"){
                          	alert(data.msg);
                         }else{
-                            for(var i=0; i < data.msg.length; i++){
-                                imgList.append('<li class="image"><div class="removeThumbnail">&times</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.msg[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.msg[i]+'" /></li>');
-                            }
+							var json = {};
+							json.imageName = [];
+							
                             $('#type').val("3");
                             $('#my-progress').hide();
-                            //$('#msgForm').submit();
-                             
+							
+                            json.imageName[0] = data.imageName;
+							localStorage.setItem('uploads', JSON.stringify(json));
+							
+							Create.send();
                         }
                          	
                     }
 					
                  });
-    });*/
+    });
     
     
     //upload the video
     $('body').on('submit', '.videoForm', function(evt) {
-				evt.preventDefault();
+				evt.preventDefault();				
 				var videoForm = $(this);
 				//var videoHolder = $(this).parent();
 				//var urlField = $(this).parent().next('.gridVideoForm').children('[name="url"]');
 				var videoList = $('.videoList');
 				var progressBar = $('#my-progress').children('.progress-bar');
 				$(this).ajaxSubmit({
-					beforeSend: function() {
+						beforeSend: function() {
 							$('#my-progress').show();
 							var progress = '0%';
 							progressBar.css('width',progress);

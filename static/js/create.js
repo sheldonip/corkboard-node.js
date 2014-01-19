@@ -17,22 +17,6 @@
 				}	
 			});
 			
-			// Upload gallery
-			/*$('body').on('submit', '.galleryForm', function(evt) { 
-				evt.preventDefault();
-				console.dir(evt.target);
-				var files = evt.target.files || evt.dataTransfer.files;
-				var reader = new FileReader();
-				
-				reader.onload = function(e){
-					var buffer = e.target.result;
-					socket.emit('send-file', file.name, buffer);
-				};
-				reader.readAsBinaryString(file);
-				
-				return false();
-			});*/
-			
 			//Process any incoming messages
 			this.socket.on('new', this.add);
 		},
@@ -51,7 +35,7 @@
 			}
 			
 			// Bug: cannot replace \\n by \<br>
-			content.content = content.content.replace('\n','<br>'); 			
+			content.content = content.content.replace('\n','<br>');
 			
 			if(type==1){
 				
@@ -112,15 +96,37 @@
 		// Sends a message to the server
 		send : function() {
 			var content = {};
+			var id = parseInt($('#notepaperId').val());
+			var type = parseInt($('#type').val());
+			var uploads = JSON.parse(localStorage.getItem('uploads'));
+			
 			// Check id
-			if($('#notepaperId').val() < maxId && $('#notepaperId').val() > 0){
-				content.content = $('#textContent').val();
-				this.socket.emit('msg', {
-					id: $('#notepaperId').val(),
-					type: $('#type').val(),
-					content: JSON.stringify(content)
-				});
+			if(id < maxId && id <= 0){
+				return false;
 			}
+			// Prepare the content
+			if(type == 1){ //Text
+				content.content = $('#textContent').val();
+			} else if(type==3){ //Gallery
+			
+				content.content = $('#textContent').val();
+				content.img = uploads.imageName;
+			} else if(type==4){ //Youtube
+			
+			} else if(type==5){ //Video
+			
+			} else if(type==6){ //Canvas
+			
+			} else {
+				console.log('Invalid type');
+				return false;
+			}
+			// Send message
+			this.socket.emit('msg', {
+				id: id,
+				type: type,
+				content: JSON.stringify(content)
+			});
 			
 			return false;
 		}
