@@ -5,6 +5,8 @@ var io = require('socket.io').listen(server);
 var mysql = require('mysql');
 var im = require('imagemagick');
 var fs = require('fs');
+var url = require('url');
+var request = require('request');
 
 // Include the express body parser
 app.configure(function () {
@@ -19,7 +21,7 @@ var connection = mysql.createConnection({
   charset  : 'utf8'
 });
 
-server.listen(8080);
+server.listen(8888);
 
 io.sockets.on('connection', function (socket) {
 	socket.on('msg', function (data) {
@@ -80,8 +82,10 @@ app.post('/upload/uploadgallery', function (req, res) {
 
 		// If there's an error
 		if(!imageName){
-			console.log("There was an error");
-			res.end();
+			objToJson.msg = "Upload error!";
+			objToJson.status = 'error';	
+			// return JSON response
+			res.json(objToJson);
 		} else {
 			var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
 			var thumbPath = __dirname + "\\static\\uploads\\resized\\" + imageName;			
@@ -92,12 +96,12 @@ app.post('/upload/uploadgallery', function (req, res) {
 				im.resize({
 					srcPath: newPath,
 					dstPath: thumbPath,
-					width: 128
+					width: 256	// auto height
 				}, function(err, stdout, stderr){
 					if (err) throw err;
-					console.log('resized image to fit within 128x128px');
+					console.log('resized image to fit within 256x256px');
 					objToJson.imageName = imageName;
-					objToJson.status = 'ok';
+					objToJson.status = 'success';
 					// return JSON response
 					res.json(objToJson);
 				});
@@ -105,4 +109,68 @@ app.post('/upload/uploadgallery', function (req, res) {
 			});
 		}
 	});
+});
+
+app.post('/upload/uploadCanvas', function (req, res) {
+	var objToJson = {};	
+	var imgData = req.body.imgData; //Canvas data
+	
+	objToJson.msg = "Invalid Canvas!";
+	objToJson.status = 'error';	
+	// return JSON response
+	res.json(objToJson);
+});
+
+// ----------------------------------video's logic
+
+app.get('/video/getYoutube/', function (req, res) {
+	var objToJson = {};
+	var url_parts = url.parse(req.url, true);
+	var query = url_parts.query;
+	var youtubeLink = query.url;
+	var pattern1 = new RegExp('^((http://)|(https://)){0,1}(www\.){0,1}youtube\.com');
+	var pattern2 = new RegExp('^((http://)|(https://)){0,1}(www\.){0,1}youtu\.be');
+	var videoId, embedUrl, jsonUrl;
+	
+	if(!pattern1.test(youtubeLink) && !pattern2.test(youtubeLink)){
+		objToJson.msg = "Invalid youtube URL!";
+		objToJson.status = 'error';	
+		// return JSON response
+		res.json(objToJson);
+	} else {
+		if(pattern1.test(youtubeLink)){	//youtube.com
+			youtubeLink = url.parse(youtubeLink, true);
+			videoId = youtubeLink.query.v;
+		} else if(pattern2.test(youtubeLink)) {	//youtu.be
+			youtubeLink = url.parse(youtubeLink, true);
+			videoId = youtubeLink.path.substring(1,12);
+		} else {
+			objToJson.msg = "Invalid youtube URL!";
+			objToJson.status = 'error';	
+			// return JSON response
+			res.json(objToJson);
+		}
+		
+		embedUrl = 'https://www.youtube.com/embed/' + videoId + '?rel=0&showinfo=0&color=white&theme=light';	
+		jsonUrl = 'http://gdata.youtube.com/feeds/api/videos/' + videoId + '?v=2&alt=jsonc';
+		
+		request(jsonUrl, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var jsonContent = JSON.parse(body);
+				objToJson.title = jsonContent.data.title;
+				objToJson.description = jsonContent.data.description.substring(0,125);
+				objToJson.description = objToJson.description.concat('...');
+				objToJson.thumbnail = jsonContent.data.thumbnail.sqDefault;
+				objToJson.id = jsonContent.data.id;
+				objToJson.videoId = videoId;
+				objToJson.status = 'success';
+			} else {
+				objToJson.msg = "Network error!";
+				objToJson.status = 'error';				
+			}
+			// return JSON response
+			res.json(objToJson);
+		});
+	}
+	
 });

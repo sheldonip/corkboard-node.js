@@ -249,17 +249,6 @@
 				return false;
 			});
     
-    //submit the message
-    /*$('body').on('submit', '#msgForm', function(evt) {
-  		
-  		evt.preventDefault();
-  		$(this).ajaxSubmit({
-  			complete: function(xhr) {                  	
-                console.log("submitted message!");
-            }
-  		});
-  		
-    });*/
     //remove the uploaded image of photo gallery
     $('body').on('click', '.imgList .removeThumbnail', function(evt) {
 
@@ -288,7 +277,7 @@
 		if(match!=null && holder.children().length==0){
 				
 			$.ajax({
- 				url: '<?php echo base_url();?>index.php/video/getYoutube/',
+ 				url: base_url+'video/getYoutube/',
 				type: "GET",
 				data: { url: site },
 				dataType: "json",
@@ -296,6 +285,11 @@
 					if(data.status=="error"){
 						alert(data.msg);
 					} else {
+						var json = {};
+						json.videoId = data.videoId;
+						localStorage.setItem('uploads', JSON.stringify(json));
+						Create.send();
+					
 						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
 						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ data.thumbnail +'" /></div>');
 						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ data.id +'">' + data.title + '</a></h5></div>');
@@ -311,7 +305,7 @@
 				},
   
 				error: function() {
-					alert("ERROR!!!");
+					console.log("ERROR in getYoutube!!!");
 				}
 			});
 			
