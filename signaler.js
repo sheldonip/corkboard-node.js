@@ -7,6 +7,7 @@ var im = require('imagemagick');
 var fs = require('fs');
 var url = require('url');
 var request = require('request');
+var crypto = require('crypto');
 
 // Include the express body parser
 app.configure(function () {
@@ -90,9 +91,9 @@ app.post('/upload/uploadgallery', function (req, res) {
 			var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
 			var thumbPath = __dirname + "\\static\\uploads\\resized\\" + imageName;			
 			objToJson.status = 'error';
-			// write file to uploads/fullsize folder
+			// write file to uploads/original folder
 			fs.writeFile(newPath, data, function (err) {
-				// write file to uploads/thumbs folder
+				// write file to uploads/resized folder
 				im.resize({
 					srcPath: newPath,
 					dstPath: thumbPath,
@@ -113,12 +114,53 @@ app.post('/upload/uploadgallery', function (req, res) {
 
 app.post('/upload/uploadCanvas', function (req, res) {
 	var objToJson = {};	
+	var newPath = __dirname + "\\static\\uploads\\canvas\\";
+	var thumbPath = __dirname + "\\static\\uploads\\thumbs\\";	
+	var unencodedData, new_file_name;
 	var imgData = req.body.imgData; //Canvas data
+	var filteredData = imgData.split(',');	
 	
-	objToJson.msg = "Invalid Canvas!";
-	objToJson.status = 'error';	
-	// return JSON response
-	res.json(objToJson);
+	if(filteredData[0] == 'data:image/png;base64'){
+		unencodedData =  new Buffer(filteredData[1], "base64");
+		
+		// Generate new file name
+		try {
+			var buf = crypto.randomBytes(10);
+			new_file_name = buf.toString('hex').substring(0,10);
+			new_file_name = new_file_name.concat('.png');
+			newPath	= newPath.concat(new_file_name);
+			thumbPath = thumbPath.concat(new_file_name);
+		} catch (ex) {
+			// handle error
+			new_file_name = "";
+			objToJson.msg = "Server error!";
+			objToJson.status = 'error';	
+			// return JSON response
+			res.json(objToJson);
+		}
+		// write file to uploads/original folder
+		fs.writeFile(newPath, unencodedData, function (err) {
+			// write file to uploads/resized folder
+			im.resize({
+				srcPath: newPath,
+				dstPath: thumbPath,
+				width: 256	// auto height
+			}, function(err, stdout, stderr){
+				if (err) throw err;
+				console.log('resized image to fit within 256x256px');
+				objToJson.imageName = new_file_name;
+				objToJson.status = 'success';
+				// return JSON response
+				res.json(objToJson);
+			});
+			
+		});
+	} else {	
+		objToJson.msg = "Invalid Canvas!";
+		objToJson.status = 'error';	
+		// return JSON response
+		res.json(objToJson);
+	}
 });
 
 // ----------------------------------video's logic

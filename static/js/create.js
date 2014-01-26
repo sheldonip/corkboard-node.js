@@ -81,7 +81,7 @@
 				notepaperInner.push('<div class="text">'+content.content+'</div>');
 												
 			} else if(type==6){
-				notepaperInner.push('<img class="canvas-img" src="'+base_url+'uploads/canvas/'+content.img+'">');
+				notepaperInner.push('<img class="canvas-img" src="'+base_url+'uploads/thumbs/'+content.img+'">');
 				notepaperInner.push('<div class="text">'+content.content+'</div>');
 				
 			} else { // the message is expired or deleted
@@ -117,6 +117,7 @@
 				content.content = $('#textContent').val();
 			} else if(type==6){ //Canvas
 				content.content = $('#textContent').val();
+				content.img = uploads.imageName;
 			} else {
 				console.log('Invalid type');
 				return false;

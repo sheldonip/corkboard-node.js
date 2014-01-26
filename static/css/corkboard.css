@@ -295,6 +295,7 @@ div.banner-container > .notepaper-video {
 div.content-container > .canvas-img{
     *border: 1px solid #000;
     height: 210px;
+	background-color: #FFFFFF;
 }
 div.banner-container > .canvas-img{
     *border: 1px solid #000;
@@ -454,6 +455,7 @@ button.removeYoutube{ float: right; }
     padding: 0;
     text-align: center;
     margin: -6px -6px;
+	cursor: pointer;
 }
 
 /**********/

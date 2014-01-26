@@ -202,10 +202,9 @@
 							
                             $('#type').val("3");
                             $('#my-progress').hide();
-							
+							// Send message
                             json.imageName[0] = data.imageName;
-							localStorage.setItem('uploads', JSON.stringify(json));
-							
+							localStorage.setItem('uploads', JSON.stringify(json));							
 							Create.send();
                         }
                          	
@@ -253,14 +252,19 @@
     $('body').on('click', '.imgList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-    		//$('#msgForm').submit();
+			//***TO-DO: check whether there is image left after removing one image
+			// Update message
+			$('#type').val("1");
+			Create.send();
     		console.log("remove.");
     	
    	});   	
    	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-    		//$('#msgForm').submit();
+			// Update message
+			$('#type').val("1");
+			Create.send();
     		console.log("remove.");
     		$('#uploadVideoBtn').show();
     	
@@ -286,6 +290,7 @@
 						alert(data.msg);
 					} else {
 						var json = {};
+						// Send message
 						json.videoId = data.videoId;
 						localStorage.setItem('uploads', JSON.stringify(json));
 						Create.send();
@@ -341,17 +346,26 @@
 				var imgList = $('.imgList');
 				$.ajax({
 					type : "POST",
-					url : "/index.php/upload/uploadCanvas",
+					url : "/upload/uploadCanvas",
 					data : {
 						imgData : canvasData//,
 						//<?php echo $this -> security -> get_csrf_token_name(); ?> : "<?php echo $this -> security -> get_csrf_hash(); ?>"
 					},
 					dataType : "json"
 				}).done(function(data) {
-					imgList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.msg +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.msg+'" /></li>');
-					$('#type').val("3");
-					$('#msgForm').submit();
+					var json = {};
+					json.imageName = [];
+					
+					imgList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
+					$('#type').val("6");
+					// Send message
+					json.imageName[0] = data.imageName;
+					localStorage.setItem('uploads', JSON.stringify(json));					
+					Create.send();
+					
+					//$('#msgForm').submit();
 					canvasData = "";
+					
 				});
 	});
 	
@@ -361,7 +375,7 @@
 		var canvas = document.getElementById('sketchpad');
 		var context = canvas.getContext('2d');
 		context.clearRect(0,0,270,296);
-		sketch.clear();
+		sketch.clear();		
 	});
 	
 	
