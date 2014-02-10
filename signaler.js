@@ -5,9 +5,6 @@ var io = require('socket.io').listen(server);
 var mysql = require('mysql');
 var im = require('imagemagick');
 var fs = require('fs');
-var url = require('url');
-var request = require('request');
-var crypto = require('crypto');
 
 // Include the express body parser
 app.configure(function () {
@@ -22,12 +19,91 @@ var connection = mysql.createConnection({
   charset  : 'utf8'
 });
 
-server.listen(8888);
+server.listen(80);
 
 io.sockets.on('connection', function (socket) {
 	socket.on('msg', function (data) {
-		io.sockets.emit('new', data);
-	});		
+		io.sockets.emit('msg', data);
+	});
+	
+	//save message to mysql db
+	socket.on('saveMsg', function (data) {
+		var objToJson = {};	
+		var msgId;
+		console.log('[DEBUG] saveMessages');
+	// Use the connection
+		var post  = {type: parseInt(data.type), content: data.content};
+		var query = connection.query('INSERT INTO message SET ?', post, function(err, result) {
+			msgId = result.insertId;
+			
+			var query2 = connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [msgId, parseInt(data.id)], function(err2, result2) {
+				console.log(query2.sql);
+			});
+		
+		});
+		
+	});
+	
+	//forward the message to the corkboard
+	socket.on('updateMsg', function (data) {
+		io.sockets.emit('updateMsg', data);
+	});
+	
+	//client fetch empty notepaper
+	socket.on('occupyNotepaper', function (data) {
+		console.log('[DEBUG] emptyMessages');
+		var msgId, notepaperId;
+		connection.query('SELECT * FROM notepaper WHERE occupied = 0 limit 1', function(err, rows) {
+			// return JSON response
+				if(rows.length>0){
+				
+					notepaperId = rows[0].id;
+				
+				} else {
+					//if full, random a notepaper
+					notepaperId = Math.floor(Math.random()*8) + 1;
+					
+				}
+				console.log('[DEBUG] notepaperId' + notepaperId);
+				var message  = {type: 1};
+				connection.query('INSERT INTO message SET ?', message, function(err, result) {
+					msgId = result.insertId;
+					console.log('[DEBUG] messageId' + msgId);
+					
+					connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [msgId, notepaperId], function(err2, result2) {
+						socket.emit('occupyNotepaperResult', {notepaperId: notepaperId, messageId: msgId});
+					});
+		
+				});
+		});
+	});
+	
+	socket.on('changePosition', function (data) {
+		console.log('[DEBUG] changeposition '+data.newNotepaperId);
+		
+		//check whether the notepaper is empty
+		connection.query('SELECT * FROM notepaper WHERE occupied = 0 AND id = ?', [parseInt(data.newNotepaperId)], function(err, rows) {
+			if(rows.length > 0){
+				//occupy another notepaper
+				var query = connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [parseInt(data.messageId), parseInt(data.newNotepaperId)], function(err2, result2) {
+					console.log(query.sql);
+				});
+		
+				//release the original notepaper
+				connection.query('UPDATE notepaper SET occupied = 0, message_id = NULL WHERE id = ?', [parseInt(data.oldNotepaperId)], function(err2, result2) {
+			
+				});
+		
+			//signal the corkboard to clear the original notepaper
+				io.sockets.emit('clearMsg', { notepaperId : parseInt(data.oldNotepaperId) });
+				socket.emit('changePositionSuccess', data);
+			} else {
+				socket.emit('changePositionFail', {});
+			}
+		});
+		
+	});
+	
 });
 
 app.use("/css/", express.static(__dirname + '/static/css'));
@@ -42,7 +118,7 @@ app.get('/', function (req, res) {
     res.sendfile(__dirname + '/static/index.html');
 });
 
-app.get('/message/create/*', function (req, res) {
+app.get('/message/create', function (req, res) {
     res.sendfile(__dirname + '/static/create.html');
 });
 
@@ -74,6 +150,25 @@ app.get('/process/updateMessages', function (req, res) {
 	});	
 });
 
+app.post('/process/occupyNotepaper', function (req, res) {
+	console.log('[DEBUG]');
+	var id = req.body.id;
+	connection.query('SELECT * FROM notepaper WHERE occupied = 0 AND id = ?', [id], function(err, rows) {
+		// return JSON response
+		console.log(rows.length);
+		if(rows.length>0){
+			
+			connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [msgId, parseInt(data.id)], function(err2, result2) {
+				console.log(query2.sql);
+			});
+			
+		}
+		else{
+			res.json({result : 0});
+		}
+	});
+});
+
 // ----------------------------------uploads' logic
 
 app.post('/upload/uploadgallery', function (req, res) {
@@ -83,26 +178,34 @@ app.post('/upload/uploadgallery', function (req, res) {
 
 		// If there's an error
 		if(!imageName){
-			objToJson.msg = "Upload error!";
-			objToJson.status = 'error';	
-			// return JSON response
-			res.json(objToJson);
+			console.log("There was an error");
+			res.end();
 		} else {
 			var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
-			var thumbPath = __dirname + "\\static\\uploads\\resized\\" + imageName;			
+			var thumbPath = __dirname + "\\static\\uploads\\thumbnail\\" + imageName;
+			var resizedPath = __dirname + "\\static\\uploads\\resized\\" + imageName;
 			objToJson.status = 'error';
-			// write file to uploads/original folder
+			// write file to uploads/fullsize folder
 			fs.writeFile(newPath, data, function (err) {
-				// write file to uploads/resized folder
+				// write file to uploads/thumbs folder
 				im.resize({
 					srcPath: newPath,
 					dstPath: thumbPath,
-					width: 256	// auto height
+					width: 128
 				}, function(err, stdout, stderr){
 					if (err) throw err;
-					console.log('resized image to fit within 256x256px');
+					console.log('resized image to fit within 128x128px');
+				});
+				
+				im.resize({
+					srcPath: newPath,
+					dstPath: resizedPath,
+					width: 538
+				}, function(err, stdout, stderr){
+					if (err) throw err;
+					console.log('resized image to fit within 538x538px');
 					objToJson.imageName = imageName;
-					objToJson.status = 'success';
+					objToJson.status = 'ok';
 					// return JSON response
 					res.json(objToJson);
 				});
@@ -112,107 +215,44 @@ app.post('/upload/uploadgallery', function (req, res) {
 	});
 });
 
-app.post('/upload/uploadCanvas', function (req, res) {
-	var objToJson = {};	
-	var newPath = __dirname + "\\static\\uploads\\canvas\\";
-	var thumbPath = __dirname + "\\static\\uploads\\thumbs\\";	
-	var unencodedData, new_file_name;
-	var imgData = req.body.imgData; //Canvas data
-	var filteredData = imgData.split(',');	
-	
-	if(filteredData[0] == 'data:image/png;base64'){
-		unencodedData =  new Buffer(filteredData[1], "base64");
-		
-		// Generate new file name
-		try {
-			var buf = crypto.randomBytes(10);
-			new_file_name = buf.toString('hex').substring(0,10);
-			new_file_name = new_file_name.concat('.png');
-			newPath	= newPath.concat(new_file_name);
-			thumbPath = thumbPath.concat(new_file_name);
-		} catch (ex) {
-			// handle error
-			new_file_name = "";
-			objToJson.msg = "Server error!";
-			objToJson.status = 'error';	
-			// return JSON response
-			res.json(objToJson);
-		}
-		// write file to uploads/original folder
-		fs.writeFile(newPath, unencodedData, function (err) {
-			// write file to uploads/resized folder
-			im.resize({
-				srcPath: newPath,
-				dstPath: thumbPath,
-				width: 256	// auto height
-			}, function(err, stdout, stderr){
-				if (err) throw err;
-				console.log('resized image to fit within 256x256px');
-				objToJson.imageName = new_file_name;
-				objToJson.status = 'success';
-				// return JSON response
-				res.json(objToJson);
-			});
-			
-		});
-	} else {	
-		objToJson.msg = "Invalid Canvas!";
-		objToJson.status = 'error';	
-		// return JSON response
-		res.json(objToJson);
-	}
-});
+//upload canvas sketch
 
-// ----------------------------------video's logic
-
-app.get('/video/getYoutube/', function (req, res) {
+app.post('/upload/uploadsketch', function (req, res) {
 	var objToJson = {};
-	var url_parts = url.parse(req.url, true);
-	var query = url_parts.query;
-	var youtubeLink = query.url;
-	var pattern1 = new RegExp('^((http://)|(https://)){0,1}(www\.){0,1}youtube\.com');
-	var pattern2 = new RegExp('^((http://)|(https://)){0,1}(www\.){0,1}youtu\.be');
-	var videoId, embedUrl, jsonUrl;
+	var imageName = Math.round(new Date().getTime() / 1000) + "-" + Math.floor(Math.random() * 2147483); //generate the filename for the image
+	var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
+	var thumbPath = __dirname + "\\static\\uploads\\thumbnail\\" + imageName;
+	var resizedPath = __dirname + "\\static\\uploads\\resized\\" + imageName;
 	
-	if(!pattern1.test(youtubeLink) && !pattern2.test(youtubeLink)){
-		objToJson.msg = "Invalid youtube URL!";
-		objToJson.status = 'error';	
-		// return JSON response
-		res.json(objToJson);
-	} else {
-		if(pattern1.test(youtubeLink)){	//youtube.com
-			youtubeLink = url.parse(youtubeLink, true);
-			videoId = youtubeLink.query.v;
-		} else if(pattern2.test(youtubeLink)) {	//youtu.be
-			youtubeLink = url.parse(youtubeLink, true);
-			videoId = youtubeLink.path.substring(1,12);
-		} else {
-			objToJson.msg = "Invalid youtube URL!";
-			objToJson.status = 'error';	
-			// return JSON response
-			res.json(objToJson);
-		}
-		
-		embedUrl = 'https://www.youtube.com/embed/' + videoId + '?rel=0&showinfo=0&color=white&theme=light';	
-		jsonUrl = 'http://gdata.youtube.com/feeds/api/videos/' + videoId + '?v=2&alt=jsonc';
-		
-		request(jsonUrl, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var jsonContent = JSON.parse(body);
-				objToJson.title = jsonContent.data.title;
-				objToJson.description = jsonContent.data.description.substring(0,125);
-				objToJson.description = objToJson.description.concat('...');
-				objToJson.thumbnail = jsonContent.data.thumbnail.sqDefault;
-				objToJson.id = jsonContent.data.id;
-				objToJson.videoId = videoId;
-				objToJson.status = 'success';
-			} else {
-				objToJson.msg = "Network error!";
-				objToJson.status = 'error';				
-			}
-			// return JSON response
-			res.json(objToJson);
-		});
-	}
 	
+	var imgData = req.body.imgData;
+	var base64data = imgData.replace(/^data:image\/\w+;base64,/, "");// strip off the data: url prefix to get just the base64-encoded bytes
+	var buf = new Buffer(base64data, 'base64');
+	
+	fs.writeFile(newPath, buf, function (err) {
+				// write file to uploads/thumbs folder
+				im.resize({
+					srcPath: newPath,
+					dstPath: thumbPath,
+					width: 128
+				}, function(err, stdout, stderr){
+					if (err) throw err;
+					console.log('resized image to fit within 128x128px');
+				});
+				
+				im.resize({
+					srcPath: newPath,
+					dstPath: resizedPath,
+					width: 538
+				}, function(err, stdout, stderr){
+					if (err) throw err;
+					console.log('resized image to fit within 538x538px');
+					objToJson.imageName = imageName;
+					objToJson.status = 'ok';
+					// return JSON response
+					res.json(objToJson);
+				});
+				
+	});
+			
 });

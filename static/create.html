@@ -8,7 +8,6 @@
         <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="/css/corkboard.css" rel="stylesheet">
         <link href="/css/sketch.css" rel="stylesheet" media="screen">
-        <link href="/css/spectrum.css" rel="stylesheet" media="screen">
 
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
@@ -53,7 +52,7 @@
 				<textarea class="form-control" id="textContent" name="content" rows="3" required></textarea>
 			</div>
 			<div class="content-container">
-                <ul class="imgList table"></ul>
+                <ul class="table" id="imgList"></ul>
                 <ul class="videoList table"></ul>
             </div>
             <div class="form-group">
@@ -70,8 +69,19 @@
 			<input type="hidden" name="videoId" id="videoId" value="" />
 			<input type="hidden" name="imagesName" id="imagesName" value="" />
 			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
+			<input type="hidden" name="messageId" id="messageId" value="" />
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
 		</form>
+		
+		<!--
+		<button type="button" id="saveBtn" class="btn btn-default btn-lg">
+			Save
+		</button>
+		-->
+		
+		<button type="button" id="positionBtn" class="btn btn-default btn-lg" data-toggle="modal" data-target="#positionModal">
+			Change Notepaper
+		</button>
 		
         </div>
         
@@ -116,6 +126,33 @@
     			</div><!-- /.modal-content -->
   			</div><!-- /.modal-dialog -->
 		</div><!-- /.modal -->
+		
+		<div class="modal fade" id="positionModal" tabindex="-1" role="dialog" aria-labelledby="positionModalLabel" aria-hidden="true">
+  			<div class="modal-dialog">
+    			<div class="modal-content">
+      				<div class="modal-header">
+      					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        				<h4 class="modal-title" id="myModalLabel">Choose position</h4>
+      				</div>
+      				<div class="modal-body" id="canvas-holder">
+						<div>
+							<div class="note-thumb" position="1"></div>
+							<div class="note-thumb" position="2"></div>
+							<div class="note-thumb" position="3"></div>
+							<div class="note-thumb" position="4"></div>
+							<div class="note-thumb" position="5"></div>
+							<div class="note-thumb" position="6"></div>
+							<div class="note-thumb" position="7"></div>
+							<div class="note-thumb" position="8"></div>
+						</div>
+					</div>
+      				<div id="canvas-footer" class="modal-footer">
+      					<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
+        				<button type="button" id="save-sketch" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+      				</div>
+    			</div><!-- /.modal-content -->
+  			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
         
 		<a href='#sketchpad' data-clear='true' id="real-clear-canvas">Clear</a>
 		
@@ -130,21 +167,39 @@
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 		
 		<!-- Custom js -->
-		<script src="/js/spectrum.js"></script>
 		<script src="/js/sketch.js"></script>	
 		<script src="/js/baseurl.js"></script>
-		<script src="/js/create.js"></script>
+		<script src="/js/client_ws.js"></script>
 
 		<script>
+		
+		$( document ).ready(function() {
 			Create.initialize(base_url);
 			// Initialise forms
-			var message_id = parseInt(pathArray[5]);
-			$('form#msgForm input[name=\"notepaperId\"]').val(message_id);
 			$('form#galleryForm-1').attr('action', base_url+'upload/uploadGallery');
 			
-			//submit the message form every 3 seconds
-			//setInterval(function(){$('#msgForm').submit();},3000);
+			//Fetch all the data from the local storage
+			var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+			var text = localStorage.getItem('text');
+			var type = localStorage.getItem('type');
+			var notepaperId = localStorage.getItem('notepaperId');
 			
+			var imgList = $('#imgList');
+			if(uploadedImg != null){
+				var uploadedImgLength = uploadedImg.imageName.length;
+				for(var i=0; i < uploadedImgLength; i++){
+					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg.imageName[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg.imageName[i]+'" /></li>');
+				}
+			}
+			if(text!=null){
+				$('#textContent').val(text);
+			}
+			if(type!=null){
+				$('#type').val(type);
+			}
+		});
+			
+						
 			//customize upload button
 			$('#uploadImgBtn').click(function(){
         		// Simulate a click on the file input button
@@ -166,12 +221,15 @@
 				$(this).parent().submit();
 			});
 			
+			
+			
+			
 			//upload the image of gallery  	
   	$('body').on('submit', '.galleryForm', function(evt) {  	
 		console.log('[DEBUG] .galleryForm submitting...');
   		evt.preventDefault();
   		var galleryForm = $(this);
-  		var imgList = $(this).parent().next().children('.content-container').children('.imgList');
+  		var imgList = $('#imgList');
   		var filename = $(this).children('#messageImg').val().split('/').pop().split('\\').pop();
   		var progressBar = $('#my-progress').children('.progress-bar');
                  $(this).ajaxSubmit({                 	
@@ -194,18 +252,27 @@
                      	galleryForm.clearForm();
                      	progressBar.width('0%');
                      	var data = JSON.parse(xhr.responseText);
+						var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
                      	if(data.status=="error"){
-                         	alert(data.msg);
+                         	alert(data.status);
                         }else{
-							var json = {};
-							json.imageName = [];
+							imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
+							
 							
                             $('#type').val("3");
                             $('#my-progress').hide();
-							// Send message
-                            json.imageName[0] = data.imageName;
-							localStorage.setItem('uploads', JSON.stringify(json));							
-							Create.send();
+							
+							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
+							if(uploadedImg == null){
+								uploadedImg = {};
+								uploadedImg.imageName = [];
+								uploadedImg.imageName[0] = data.imageName;
+							}
+							else{ //append the newly uploaded image to the local storage
+								uploadedImg.imageName.push(data.imageName);
+							}
+							localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+							Create.updateMsg();
                         }
                          	
                     }
@@ -248,23 +315,38 @@
 				return false;
 			});
     
+    //submit the message
+    /*$('body').on('submit', '#msgForm', function(evt) {
+  		
+  		evt.preventDefault();
+  		$(this).ajaxSubmit({
+  			complete: function(xhr) {                  	
+                console.log("submitted message!");
+            }
+  		});
+  		
+    });*/
     //remove the uploaded image of photo gallery
-    $('body').on('click', '.imgList .removeThumbnail', function(evt) {
+    $('body').on('click', '#imgList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-			//***TO-DO: check whether there is image left after removing one image
-			// Update message
-			$('#type').val("1");
-			Create.send();
-    		console.log("remove.");
+			var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+    		var uploadedImgLength = uploadedImg.imageName.length;
+			for(var i=0; i < uploadedImgLength; i++){
+				if(uploadedImg.imageName[i] == $(this).parent().find('.imgUrl').attr('value')){
+					uploadedImg.imageName.splice(i, 1);
+					localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+					
+				}	
+			}
+			
+    		
     	
    	});   	
    	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-			// Update message
-			$('#type').val("1");
-			Create.send();
+    		//$('#msgForm').submit();
     		console.log("remove.");
     		$('#uploadVideoBtn').show();
     	
@@ -276,41 +358,38 @@
 		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}((youtube\.com)|(youtu\.be))/g);
 		var holder = $(this).next();
 		var idField = $('#videoId');
-		
+		console.log(site);
+		var a = $('<a>', { href:site } )[0];
+		var videoId = a.pathname.slice(1);
+		console.log(videoId);
 		//if the input url is a valid youtube url and it is the first time for it to appear
 		if(match!=null && holder.children().length==0){
 				
 			$.ajax({
- 				url: base_url+'video/getYoutube/',
+ 				url: 'http://gdata.youtube.com/feeds/api/videos/'+videoId,
 				type: "GET",
-				data: { url: site },
-				dataType: "json",
-				success: function(data) {
-					if(data.status=="error"){
-						alert(data.msg);
-					} else {
-						var json = {};
-						// Send message
-						json.videoId = data.videoId;
-						localStorage.setItem('uploads', JSON.stringify(json));
-						Create.send();
-					
+				data: { v: "2", alt: "jsonc"},
+				dataType: "jsonp",
+				success: function(youtube) {
+					if(youtube.status=="error"){
+						alert(youtube.msg);
+					} else { 
 						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
-						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ data.thumbnail +'" /></div>');
-						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ data.id +'">' + data.title + '</a></h5></div>');
-						holder.append('<div class="youtubeDescription">'+data.description+'</div>');
+						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
+						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
+						holder.append('<div class="youtubeDescription">'+youtube.data.description.substr(0, 125)+'</div>');
 						// Update UI
                         $('div.youtubeHolder').css('padding','2%');
                         $('div.youtubeHolder').css('border','1px solid #CCCCCC');
 						
-						idField.attr('value', data.id);
+						idField.attr('value', youtube.data.id);
 						//$('#textTitle').attr('value', data.title);
 						
 					}
 				},
   
 				error: function() {
-					console.log("ERROR in getYoutube!!!");
+					alert("ERROR!!!");
 				}
 			});
 			
@@ -328,6 +407,7 @@
    	//submit after save youtube url
    	$("#save-youtube").on("click", function() {
 		$('#type').val("4");
+		Create.updateMsg();
 		//$('#msgForm').submit();
 	});
 	
@@ -343,29 +423,35 @@
 				event.preventDefault();
 				var canvasTest = document.getElementById('sketchpad');
 				var canvasData = canvasTest.toDataURL("image/png");
-				var imgList = $('.imgList');
+				var imgList = $('#imgList');
+				var text = $('#textContent').val();
+				
+				
 				$.ajax({
 					type : "POST",
-					url : "/upload/uploadCanvas",
+					url : base_url+'upload/uploadSketch',
 					data : {
 						imgData : canvasData//,
 						//<?php echo $this -> security -> get_csrf_token_name(); ?> : "<?php echo $this -> security -> get_csrf_hash(); ?>"
 					},
 					dataType : "json"
 				}).done(function(data) {
-					var json = {};
-					json.imageName = [];
-					
-					imgList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/thumbs/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
-					$('#type').val("6");
-					// Send message
-					json.imageName[0] = data.imageName;
-					localStorage.setItem('uploads', JSON.stringify(json));					
-					Create.send();
-					
-					//$('#msgForm').submit();
+					var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
+					$('#type').val("3");
 					canvasData = "";
-					
+						//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
+							if(uploadedImg == null){
+								uploadedImg = {};
+								uploadedImg.imageName = [];
+								uploadedImg.imageName[0] = data.imageName;
+							}
+							else{ //append the newly uploaded image to the local storage
+								uploadedImg.imageName.push(data.imageName);
+							}
+							localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+							Create.updateMsg();
+
 				});
 	});
 	
@@ -375,7 +461,7 @@
 		var canvas = document.getElementById('sketchpad');
 		var context = canvas.getContext('2d');
 		context.clearRect(0,0,270,296);
-		sketch.clear();		
+		//sketch.clear();
 	});
 	
 	

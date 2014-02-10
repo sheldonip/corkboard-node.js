@@ -75,7 +75,7 @@ a.note {
 	-moz-transition: all .2s ease-in-out;
 	-webkit-transition: all .2s ease-in-out;
 	float: left;
-	background-color: #333333;
+	background-color: #FFF780;
 	-webkit-box-shadow: 4px 4px 8px -4px rgba(0, 0, 0, .75);
     -moz-box-shadow: 4px 4px 8px -4px rgba(0, 0, 0, .75);
     box-shadow: 4px 4px 8px -4px rgba(0, 0, 0, .75);
@@ -84,7 +84,7 @@ a.note {
 	border: 1px solid rgba(0,0,0,.25);
 	cursor: default;
 	width: 23%;
-    height: auto;
+    height: 80px;
 }
 
 .note {
@@ -295,7 +295,6 @@ div.banner-container > .notepaper-video {
 div.content-container > .canvas-img{
     *border: 1px solid #000;
     height: 210px;
-	background-color: #FFFFFF;
 }
 div.banner-container > .canvas-img{
     *border: 1px solid #000;
@@ -392,7 +391,7 @@ div.imgholder img{
     max-width: 538px;
 }
 
-form ul.imgList li,
+form #imgList li,
 form ul.videoList li{ position: relative;}
 .uThumbnail {
 	width: 58px;
@@ -408,17 +407,17 @@ form div.content-container{
     overflow-x: scroll;
     overflow-y: hidden;
 }
-form div.content-container ul.imgList > li,
+form div.content-container #imgList > li,
 form div.content-container ul.videoList > li{
     *width: 48%;    
     margin-right: 3px;
     display: inline-block;
 }
-form div.content-container ul.imgList > li > button{
+form div.content-container #imgList > li > button{
     margin-top: 2%;
     margin-bottom: 10%;
 }
-.imgList{
+#imgList{
 	width: 1024px;
 }
 
@@ -455,7 +454,6 @@ button.removeYoutube{ float: right; }
     padding: 0;
     text-align: center;
     margin: -6px -6px;
-	cursor: pointer;
 }
 
 /**********/

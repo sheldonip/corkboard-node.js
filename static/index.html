@@ -66,11 +66,12 @@
                		Want to Post ?
                	</div>
                	
-        		<img class="notepaper-qrCode" src="">
-        		
         		<div class="text">
                		Scan here -->
                	</div>
+				
+				<div id='qrcode'>
+				</div>
         	</a>
                 
         </div><!-- End of wrapper -->
@@ -85,24 +86,24 @@
 		<!-- Socket.io -->
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 		<!-- Custom js -->
-		<script src="/js/create.js"></script>		
+		<script src="/js/corkboard_ws.js"></script>		
 		<script src="/js/baseurl.js"></script>
+		<script src="/js/qrcode.js"></script>
         <script>
 			Create.initialize(base_url);
 		
-        	var lastUpdateTime;
-			var notepaper;        	
+        	//var lastUpdateTime;
+			var notepaper;
         	      	
             $( document ).ready(function() {
-            	lastUpdateTime = "";
                 $(".album ul li:first-child").animate({opacity: 1.0}, 800);
                 $(".album ul li:not(:first-child)").animate({opacity: 0.0}, 800);
                 
-                var player = $("#ytplayers-1");
+                //var player = $("#ytplayers-1");
                 //player.mute();
                 
 				// Gallery animation
-                /*setInterval(function() {
+                setInterval(function() {
 					$('.album ul').each(function(){
 							var firstLi = $(this).children('li').first().detach(); // Remove the first element
 							$(this).append(firstLi); // Add it back to the end
@@ -110,7 +111,18 @@
 							$(this).children('li:not(:first-child)').animate({opacity: 0.0}, 800);
 						}
 					);
-                }, 3000);*/
+                }, 3000);
+				
+				updateMessages();
+				new QRCode(document.getElementById("qrcode"), {
+					text: base_url+"message/create",
+					width: 172,
+					height: 172,
+					colorDark : "#000000",
+					colorLight : "#ffffff",
+					correctLevel : QRCode.CorrectLevel.H
+				});
+				
             });
 			
 			function updateMessages() {
@@ -120,10 +132,11 @@
 					$.ajax({
 					url: base_url + 'process/updateMessages',
 					type: "GET",
-					data: { lastUpdateTime: lastUpdateTime },
+					//data: { lastUpdateTime: lastUpdateTime },
 					dataType: "json",
 					success: function(data) {						
 						data.notepapers = JSON.parse(data.notepapers);
+						console.log(data.notepapers);
 						
 						if(data.notepapers != null){							
 							for(var i=0 ; notepaper = data.notepapers[i] ; i++){
@@ -166,7 +179,7 @@
 								} else if(notepaper.type==4){
 									
 									notepaperInner.push('<div class="notepaper-youtube">');
-									notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+content.videoId+'?autoplay=1&controls=0&loop=1&playlist='+content.videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
+									notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="http://www.youtube.com/embed/'+content.videoId+'?autoplay=1&controls=0&loop=1&playlist='+content.videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
 									notepaperInner.push('</div>');
 									notepaperInner.push('<div class="text">'+content.content+'</div>');
 									
@@ -196,16 +209,18 @@
 						}
 						
 						// What's that?
+						/*
 						lastUpdateTime = data.time;
 						console.log('[DEBUG] data.time: ' + data.time);
-						
+						*/
+						console.log("[DEBUG] updateMessages() ended");		
 					},
 	  
 					error: function() {
 						console.log("ERROR!!!");
 					}
 				});
-				}updateMessages();
+				}
         </script>
     </body>
 </html>

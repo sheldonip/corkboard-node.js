@@ -53,5 +53,3 @@ Reference
  * [node-mysql](https://github.com/felixge/node-mysql)
  * [QRCode.js](http://davidshimjs.github.io/qrcodejs/)
  * [node-imagemagick](https://github.com/rsms/node-imagemagick)
- * [Request -- Simplified HTTP client](https://github.com/mikeal/request)
- * [crypto-js](https://npmjs.org/package/crypto-js)
