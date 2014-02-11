@@ -19,7 +19,7 @@ var connection = mysql.createConnection({
   charset  : 'utf8'
 });
 
-server.listen(80);
+server.listen(8888);
 
 io.sockets.on('connection', function (socket) {
 	socket.on('msg', function (data) {

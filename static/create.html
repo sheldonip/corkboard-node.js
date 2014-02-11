@@ -315,17 +315,6 @@
 				return false;
 			});
     
-    //submit the message
-    /*$('body').on('submit', '#msgForm', function(evt) {
-  		
-  		evt.preventDefault();
-  		$(this).ajaxSubmit({
-  			complete: function(xhr) {                  	
-                console.log("submitted message!");
-            }
-  		});
-  		
-    });*/
     //remove the uploaded image of photo gallery
     $('body').on('click', '#imgList .removeThumbnail', function(evt) {
 
@@ -355,16 +344,22 @@
    	//Paste Youtube URL
    	$('body').on('change', '#youtubeUrl', function(evt) {
     	var site= $(this).val();
-		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}((youtube\.com)|(youtu\.be))/g);
+		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtube\.com)/g);
+		var match1 = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)/g);
 		var holder = $(this).next();
 		var idField = $('#videoId');
-		console.log(site);
+		//console.log('[DEBUG] site: ' + site);
 		var a = $('<a>', { href:site } )[0];
-		var videoId = a.pathname.slice(1);
-		console.log(videoId);
+		var videoId;
+		if(match1!=null){
+			videoId = a.pathname.slice(1);
+		} else {
+			videoId = getParameterByName('v',site);
+		}
+		console.log('[DEBUG] videoId: ' + videoId);
 		//if the input url is a valid youtube url and it is the first time for it to appear
-		if(match!=null && holder.children().length==0){
-				
+		if((match!=null || match1!=null)){
+			holder.empty();	
 			$.ajax({
  				url: 'http://gdata.youtube.com/feeds/api/videos/'+videoId,
 				type: "GET",
@@ -374,6 +369,7 @@
 					if(youtube.status=="error"){
 						alert(youtube.msg);
 					} else { 
+						var uploads = JSON.parse(localStorage.getItem('uploads'));
 						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
 						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
 						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
@@ -384,6 +380,9 @@
 						
 						idField.attr('value', youtube.data.id);
 						//$('#textTitle').attr('value', data.title);
+						
+						uploads.videoId = videoId;
+						localStorage.setItem('uploads', JSON.stringify(uploads));
 						
 					}
 				},
@@ -464,7 +463,22 @@
 		//sketch.clear();
 	});
 	
+	// Get parameter by name in a url string
+	function getParameterByName(name, string){
+	  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+	  var regexS = "[\\?&]"+name+"=([^&#]*)";
+	  var regex = new RegExp( regexS );
+	  var results = regex.exec(string);
+	  if( results == null )
+		return "";
+	  else
+		return decodeURIComponent(results[1].replace(/\+/g, " "));
+	}
 	
+	$("#positionBtn").on("click", function(){
+		//***TO-DO: check unoccupied notepapers and show results
+		console.log('[DEBUG] queryPositions()');
+	});
 		</script>
 
 	</body>

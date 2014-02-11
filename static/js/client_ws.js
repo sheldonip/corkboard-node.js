@@ -79,16 +79,16 @@
 			// Prepare the content
 			if(type == 1){ //Text
 				content.content = $('#textContent').val();
-			} else if(type==3){ //Gallery
-			
+			} else if(type==3){ //Gallery			
 				content.content = $('#textContent').val();
 				content.img = uploads.imageName;
 			} else if(type==4){ //Youtube
-			
+				content.content = $('#textContent').val();
+				content.videoId = uploads.videoId;
 			} else if(type==5){ //Video
-			
+				content.content = $('#textContent').val();
 			} else if(type==6){ //Canvas
-			
+				content.content = $('#textContent').val();
 			} else {
 				console.log('Invalid type');
 				return false;
@@ -168,5 +168,6 @@
 		changePositionFail: function(notepaper) {
 			alert('The notepaper is already occupied.');
 		}
+		
 	};
 }());
