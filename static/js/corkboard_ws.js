@@ -1,7 +1,7 @@
 // Define all types of messages
 (function () {
 	var maxId = 8;
-	window.Create = {		
+	window.Corkboard = {		
 		socket : null,
   
 		// Initialisation
@@ -29,7 +29,7 @@
 			}
 			
 			// Bug: cannot replace \\n by \<br>
-			//content.content = content.content.replace('\n','<br>');
+			//content.content = content.content.replace('\n','<br>');'
 			
 			if(type==1){
 				

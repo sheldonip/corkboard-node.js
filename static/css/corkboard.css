@@ -84,7 +84,14 @@ a.note {
 	border: 1px solid rgba(0,0,0,.25);
 	cursor: default;
 	width: 23%;
-    height: 80px;
+    height: 80px;	
+}
+
+.note-thumb.occupied{
+	opacity: 0.3;
+	padding: 28px 0;
+	font-weight: bold;
+	font-size: 40px;
 }
 
 .note {
@@ -454,6 +461,10 @@ button.removeYoutube{ float: right; }
     padding: 0;
     text-align: center;
     margin: -6px -6px;
+}
+
+div.imgholder button.btn-lg{
+	width: 20%;
 }
 
 /**********/

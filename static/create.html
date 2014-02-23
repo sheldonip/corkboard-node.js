@@ -21,12 +21,15 @@
         <h1>Post Message</h1>
 		<div class="imgholder">
 			<button type="button" id="uploadImgBtn" class="btn btn-primary btn-lg">
+				Image
 				<span class="glyphicon glyphicon-camera"></span>
 			</button>
 			<button type="button" id="uploadVideoBtn" class="btn btn-success btn-lg">
+				Video
 				<span class="glyphicon glyphicon-facetime-video"></span>
 			</button>
 			<button class="btn btn-info btn-lg" data-toggle="modal" data-target="#sketchModal">
+				Sketch
 				<span class="glyphicon glyphicon-picture"></span>
 			</button>
 			<button class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
@@ -185,7 +188,7 @@
 			var notepaperId = localStorage.getItem('notepaperId');
 			
 			var imgList = $('#imgList');
-			if(uploadedImg != null){
+			if(uploadedImg != null && uploadedImg.imageName){
 				var uploadedImgLength = uploadedImg.imageName.length;
 				for(var i=0; i < uploadedImgLength; i++){
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg.imageName[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg.imageName[i]+'" /></li>');
@@ -332,7 +335,9 @@
     		
     	
    	});   	
-   	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
+   	
+	//remove the thumbnail of uploaded video
+	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
     		//$('#msgForm').submit();
@@ -348,15 +353,17 @@
 		var match1 = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)/g);
 		var holder = $(this).next();
 		var idField = $('#videoId');
-		//console.log('[DEBUG] site: ' + site);
 		var a = $('<a>', { href:site } )[0];
 		var videoId;
+		var uploads = JSON.parse(localStorage.getItem('uploads'));
+		
 		if(match1!=null){
 			videoId = a.pathname.slice(1);
 		} else {
 			videoId = getParameterByName('v',site);
 		}
 		console.log('[DEBUG] videoId: ' + videoId);
+		
 		//if the input url is a valid youtube url and it is the first time for it to appear
 		if((match!=null || match1!=null)){
 			holder.empty();	
@@ -369,7 +376,7 @@
 					if(youtube.status=="error"){
 						alert(youtube.msg);
 					} else { 
-						var uploads = JSON.parse(localStorage.getItem('uploads'));
+						var uploads = JSON.parse(localStorage.getItem('uploads')) || {};
 						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
 						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
 						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
@@ -383,6 +390,8 @@
 						
 						uploads.videoId = videoId;
 						localStorage.setItem('uploads', JSON.stringify(uploads));
+						$('#type').val("4");
+						Create.updateMsg();
 						
 					}
 				},
@@ -476,8 +485,9 @@
 	}
 	
 	$("#positionBtn").on("click", function(){
-		//***TO-DO: check unoccupied notepapers and show results
-		console.log('[DEBUG] queryPositions()');
+		// Check unoccupied notepapers and show results
+		//console.log('[DEBUG] queryPositions()');
+		 Create.queryPositions();
 	});
 		</script>
 

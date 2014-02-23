@@ -104,6 +104,23 @@ io.sockets.on('connection', function (socket) {
 		
 	});
 	
+	socket.on('queryPositions', function (data) {
+		var objToJson = {};	
+		
+		//get all id of empty notepapers
+		connection.query('SELECT id FROM notepaper WHERE occupied = 0', function(err, rows) {
+			if(rows.length > 0){
+				objToJson.notepapers = JSON.stringify(rows);
+				objToJson.status = 'ok';
+			} else {
+				objToJson.status = 'error';
+			}
+			// return JSON response
+			socket.emit('queryPositionsHandler', objToJson);
+		});
+		
+	});
+	
 });
 
 app.use("/css/", express.static(__dirname + '/static/css'));
@@ -126,7 +143,7 @@ app.get('/message/choosepos', function (req, res) {
     res.sendfile(__dirname + '/static/choosePos.html');
 });
 
-app.get('/process/updateNotepapers', function (req, res) {
+/*app.get('/process/updateNotepapers', function (req, res) {
     var objToJson = {};	
 	console.log('[DEBUG] updateNotepapers');
 	
@@ -136,7 +153,7 @@ app.get('/process/updateNotepapers', function (req, res) {
 		// return JSON response
 		res.json(objToJson);
 	});	
-});
+});*/
 
 app.get('/process/updateMessages', function (req, res) {
     var objToJson = {};	
@@ -167,6 +184,21 @@ app.post('/process/occupyNotepaper', function (req, res) {
 			res.json({result : 0});
 		}
 	});
+});
+
+app.get('/process/resetNotepapers', function (req, res) {
+    var objToJson = {};	
+	console.log('[DEBUG] resetNotepapers');
+	
+	// Use the connection
+	connection.query('UPDATE notepaper SET occupied = 0, message_id = NULL', function(err, rows){		
+		objToJson.status = 'notepapers reset';
+		if(err){
+			objToJson.status = 'error';
+		}
+		// return JSON response
+		res.json(objToJson);
+	});	
 });
 
 // ----------------------------------uploads' logic

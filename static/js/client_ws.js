@@ -52,6 +52,9 @@
 			//Process incoming notepaper
 			this.socket.on('occupyNotepaperResult', this.occupyNotepaperResult);
 			
+			//Process query result
+			this.socket.on('queryPositionsHandler', this.queryPositionsHandler);
+			
 			//Check whether the user has been occupied a notepaper before
 			var notepaperId = localStorage.getItem('notepaperId');
 			var messageId = localStorage.getItem('messageId');
@@ -167,7 +170,24 @@
 		
 		changePositionFail: function(notepaper) {
 			alert('The notepaper is already occupied.');
-		}
+		},
 		
+		queryPositions: function(){
+			this.socket.emit('queryPositions', {});
+		},
+		
+		queryPositionsHandler: function(data){			
+			if(data.notepapers && data.status == 'ok'){
+				data.notepapers = JSON.parse(data.notepapers);
+				$('div#positionModal div.note-thumb').addClass('occupied');
+				$('div#positionModal div.note-thumb').html('X');
+				for(var i = 0; i < data.notepapers.length; i++){
+					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').removeClass('occupied');
+					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').html('');
+				}
+			} else {
+				console.log('[ERROR] Cannot query position of notepapers.');
+			}
+		}
 	};
 }());
