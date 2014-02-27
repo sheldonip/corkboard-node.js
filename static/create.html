@@ -32,7 +32,7 @@
 				Sketch
 				<span class="glyphicon glyphicon-picture"></span>
 			</button>
-			<button class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
+			<button id="btn-youtube" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
 			
 			<!-- ***TO-DO: Handle multiple images -->
 			<form id="galleryForm-1" class="galleryForm" action="" method="POST" enctype="multipart/form-data">
@@ -56,7 +56,9 @@
 			</div>
 			<div class="content-container">
                 <ul class="table" id="imgList"></ul>
-                <ul class="videoList table"></ul>
+                <ul class="videoList table">
+					<li id="youtube"></li>
+				</ul>
             </div>
             <div class="form-group">
             	<label for="type">Current Type:</label>
@@ -225,7 +227,87 @@
 				$(this).parent().submit();
 			});
 			
+		// Upload text messages
+	$('#textContent').keyup(function(evt) {	
+		// url check
+		var string = $(this).val();
+		var youtubematch = string.match(/((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtube\.com)\/[^\s]+/g);
+		var youtubematch1 = string.match(/((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)\/[^\s]+/g);
+		var holder = $("div.content-container ul.videoList li#youtube");
+		var idField = $('#videoId');
+		var a = $('<a>', { href:youtubematch1 } )[0];
+		var videoId;
+		var uploads = JSON.parse(localStorage.getItem('uploads'));
+		
+		if(youtubematch1!=null){
+			videoId = a.pathname.slice(1);
+		} else if(youtubematch!=null) {
+			videoId = getParameterByName('v',youtubematch);
+		} else {}
+		
+		console.log('[DEBUG] videoId: ' + videoId);
+		
+		//if the input url is a valid youtube url and it is the first time for it to appear
+		if((youtubematch!=null || youtubematch1!=null)){
+			holder.empty();	
+			if(!videoId){
+				return false; 
+			}
+			$.ajax({
+ 				url: 'http://gdata.youtube.com/feeds/api/videos/'+videoId,
+				type: "GET",
+				data: { v: "2", alt: "jsonc"},
+				dataType: "jsonp",
+				success: function(youtube) {
+					if(youtube.status=="error"){
+						alert(youtube.msg);
+					} else { 
+						var uploads = JSON.parse(localStorage.getItem('uploads')) || {};
+						holder.empty();	
+						if(youtube.data){
+							holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
+							holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
+							holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
+							holder.append('<div class="youtubeDescription">'+youtube.data.description.substr(0, 125)+'</div>');
+							holder.append('</li>');
+							// Update UI
+							$('form div.content-container ul.videoList > li').css('padding','2%');
+							$('form div.content-container ul.videoList > li').css('border','1px solid #CCCCCC');
+							
+							idField.attr('value', youtube.data.id);
+							//$('#textTitle').attr('value', data.title);
+							
+							uploads.videoId = videoId;
+							localStorage.setItem('uploads', JSON.stringify(uploads));
+							$('#type').val("4");
+							Create.updateMsg();
+						}
+						
+					}
+				},
+  
+				error: function() {
+					alert("ERROR!!!");
+				}
+			});
 			
+		}
+		// end of url check
+		
+		// Check any uploads still stored in localstorage
+		if(uploads.imageName && uploads.imageName.length > 0){
+			$('#type').val("3");
+		} else if (uploads.videoName && uploads.videoName.length > 0){
+			$('#type').val("5");
+		} else if (uploads.videoId && uploads.videoId.length > 0){
+			$('#type').val("4");
+		} else {
+			$('#type').val("1");
+		}
+	
+		Create.updateMsg();
+		return false;
+	});		
 			
 			
 			//upload the image of gallery  	
@@ -359,8 +441,8 @@
    	
 	//remove the thumbnail of uploaded video
 	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
-
     		$(this).parent().remove();
+			
 			var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
     		var uploadedVideoLength = uploadedVideo.videoName.length;
 			for(var i=0; i < uploadedVideoLength; i++){
@@ -380,7 +462,7 @@
    	});   
    	
    	//Paste Youtube URL
-   	$('body').on('change', '#youtubeUrl', function(evt) {
+   	/*$('body').on('change', '#youtubeUrl', function(evt) {
     	var site= $(this).val();
 		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtube\.com)/g);
 		var match1 = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)/g);
@@ -435,13 +517,21 @@
 			});
 			
 		}
-	});
+	});*/
 	
 	//remove the youtube holder
 	$('body').on('click', '.removeYoutube', function(evt) {
+		evt.preventDefault();
+		var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
+    	var uploadedVideoLength = uploadedVideo.videoId.length;
+		if(uploadedVideoLength > 0){
+			uploadedVideo.videoId = [];
+			localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+		}
+	
 	    // Update UI
-	    $('div.youtubeHolder').css('padding','0%');
-	    $('div.youtubeHolder').css('border','0');
+	    $('form div.content-container ul.videoList > li').css('padding','0%');
+	    $('form div.content-container ul.videoList > li').css('border','0');
     	$(this).parent().children().remove();
    	});
    	
@@ -522,7 +612,9 @@
 		//console.log('[DEBUG] queryPositions()');
 		 Create.queryPositions();
 	});
-		</script>
+
+
+	</script>
 
 	</body>
 </html>

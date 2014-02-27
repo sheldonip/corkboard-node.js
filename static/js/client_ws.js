@@ -8,15 +8,6 @@
 		initialize : function(socketURL) {
 			this.socket = io.connect(socketURL);
 
-			// Upload text messages
-			$('#textContent').keyup(function(evt) {
-				//if ((evt.keyCode || evt.which) == 13) {
-					// 2 identical messages are sent, don't know why
-					Create.updateMsg();
-					return false;
-				//}	
-			});
-			
 			//send out message when type change
 			$( "#type" ).on("change", function() {
 				Create.updateMsg();
