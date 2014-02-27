@@ -40,7 +40,7 @@
 				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
 			</form>
 			
-			<form role="form" class="videoForm" action="/index.php/upload/uploadVideo" method="POST" enctype="multipart/form-data">
+			<form role="form" class="videoForm" action="" method="POST" enctype="multipart/form-data">
 				<input type="file" id="messageVideo" name="messageVideo" accept="video/*" pattern="([^\s]+(?=\.(mov|mpeg|mp4|avi|3gp))\.\2)" />
 				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
 			</form>
@@ -180,6 +180,7 @@
 			Create.initialize(base_url);
 			// Initialise forms
 			$('form#galleryForm-1').attr('action', base_url+'upload/uploadGallery');
+			$('form.videoForm').attr('action', base_url+'upload/uploadVideo');
 			
 			//Fetch all the data from the local storage
 			var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
@@ -266,7 +267,7 @@
                             $('#my-progress').hide();
 							
 							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-							if(uploadedImg == null){
+							if(uploadedImg == null || uploadedImg.imageName == null){
 								uploadedImg = {};
 								uploadedImg.imageName = [];
 								uploadedImg.imageName[0] = data.imageName;
@@ -304,13 +305,30 @@
 						},
 						complete: function(xhr) {
 							var data = JSON.parse(xhr.responseText);
+							var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
+							videoForm.clearForm();
+							progressBar.width('0%');
 							if(data.status=="error"){
-								alert(data.msg);
+								console.log(data.msg);
 							}else{
-								videoList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(/uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
+								videoList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(' +base_url+'uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
 								$('#type').val("5");
 								$('#my-progress').hide();
 								$('#uploadVideoBtn').hide();
+								
+								//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
+								if(uploadedVideo == null || uploadedVideo.videoName == null){
+									uploadedVideo = {};
+									uploadedVideo.videoName = [];
+									uploadedVideo.videoName[0] = data.msg;
+								}
+								else{ //append the newly uploaded image to the local storage
+									uploadedVideo.videoName.push(data.msg);
+								}
+								localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+								
+								//Boardcast update
+								Create.updateMsg();
 								//$('#msgForm').submit();
 							}
 						}
@@ -332,7 +350,10 @@
 				}	
 			}
 			
-    		
+    		if($('#imgList .removeThumbnail')){
+				$('#type').val("1");
+				Create.updateMsg();
+			}
     	
    	});   	
    	
@@ -340,7 +361,19 @@
 	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
+			var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
+    		var uploadedVideoLength = uploadedVideo.videoName.length;
+			for(var i=0; i < uploadedVideoLength; i++){
+				if(uploadedVideo.videoName[i] == $(this).parent().find('.videoUrl').attr('value')){
+					uploadedVideo.videoName.splice(i, 1);
+					localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+					
+				}	
+			}
+			
     		//$('#msgForm').submit();
+			$('#type').val("1");
+			Create.updateMsg();
     		console.log("remove.");
     		$('#uploadVideoBtn').show();
     	

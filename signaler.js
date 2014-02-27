@@ -5,6 +5,8 @@ var io = require('socket.io').listen(server);
 var mysql = require('mysql');
 var im = require('imagemagick');
 var fs = require('fs');
+var sys = require('sys')
+var exec = require('child_process').exec;
 
 // Include the express body parser
 app.configure(function () {
@@ -200,6 +202,7 @@ app.get('/process/resetNotepapers', function (req, res) {
 		res.json(objToJson);
 	});	
 });
+//***TO-DO: Handle messages with null expire date
 
 // ----------------------------------uploads' logic
 
@@ -288,3 +291,96 @@ app.post('/upload/uploadsketch', function (req, res) {
 	});
 			
 });
+
+// upload video
+app.post('/upload/uploadVideo', function (req, res) {
+	var objToJson = {};
+	var videoName = Math.round(new Date().getTime() / 1000) + "-" + Math.floor(Math.random() * 2147483); //generate the filename for the image
+	var filePath = __dirname + "\\static\\uploads\\video\\";	//ffmpeg path
+	var newPath = __dirname + "\\static\\uploads\\video\\" + videoName;
+	
+	fs.readFile(req.files.messageVideo.path, function (err, data) {		
+		if(err){
+			objToJson.status = 'error';
+			objToJson.msg = err;
+			// return JSON response
+			res.json(objToJson);
+		} else {
+			var messageVideo = req.files.messageVideo.name;
+			var extension = getExtension(messageVideo);
+			objToJson.debug = req.files.messageVideo;
+			
+			// write file to uploads/video folder
+			fs.writeFile(newPath+'.'+extension, data, function (err) {
+				if(err){
+					objToJson.status = 'error';
+					objToJson.msg = err;
+					// return JSON response
+					res.json(objToJson);
+				}
+				var command, command2;
+				
+				// Check and prepare to convert files to mp4
+				if(extension == 'mp4'){
+					command = "\n";
+				} else if(extension == 'avi'){
+					command = filePath + 'ffmpeg -i ' + (newPath+'.'+extension) + ' -c:v libx264 -crf 19 -preset slow -c:a libfaac -b:a 192k -ac 2 ' + (newPath+'.mp4');
+				} else if(extension == 'mov'){
+					command = filePath + 'ffmpeg -i ' + (newPath+'.'+extension) + ' -vcodec h264 ' + (newPath+'.mp4');
+				} else if(extension == '3gp'){
+					command = filePath + 'ffmpeg -i ' + (newPath+'.'+extension) + ' -qscale 0 -ab 64k -ar 44100 ' + (newPath+'.mp4');
+				} else {
+					objToJson.status = 'error';
+					objToJson.msg = 'Invalid file type';
+					// return JSON response
+					res.json(objToJson);
+				}
+				// Execute the convert command
+				exec(command, function (error, stdout, stderr) {
+					sys.print('command stdout: ' + stdout + "\n");
+					sys.print('command stderr: ' + stderr + "\n");
+					if (error !== null) {
+						objToJson.status = 'error';
+						objToJson.msg = error;
+						// return JSON response
+						res.json(objToJson);
+					}
+					
+					// Delete original video file
+					if(extension != 'mp4'){
+						fs.unlink(newPath+'.'+extension, function (err) {
+						  if (err){
+							console.log('Failed to delete original video');
+						  }
+						});
+					}
+					
+					// Create a thumbnail
+					command2 = filePath + "ffmpeg -itsoffset -3 -i " + (newPath+'.mp4') + " -vcodec mjpeg -vframes 1 -an -f rawvideo -s 320x240 " + (newPath+'.jpg');
+					exec(command2, function (error, stdout, stderr) {
+						sys.print('command2 stdout: ' + stdout + "\n");
+						sys.print('command2 stderr: ' + stderr + "\n");
+						if (error !== null) {
+							objToJson.status = 'error';
+							objToJson.msg = error;
+							// return JSON response
+							res.json(objToJson);
+						}
+						
+						objToJson.status = 'ok';
+						objToJson.msg = videoName + '.mp4';
+						objToJson.thumbnail = videoName + '.jpg';
+						// return JSON response
+						res.json(objToJson);
+					});	
+				});			
+						
+			});			
+		}
+	});	
+});
+
+function getExtension(filename) {
+    var i = filename.lastIndexOf('.');
+    return (i < 0) ? '' : filename.substr(i+1);
+}

@@ -90,6 +90,7 @@
 				content.videoId = uploads.videoId;
 			} else if(type==5){ //Video
 				content.content = $('#textContent').val();
+				content.video = uploads.videoName;
 			} else if(type==6){ //Canvas
 				content.content = $('#textContent').val();
 			} else {
