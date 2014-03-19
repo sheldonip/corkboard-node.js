@@ -6,74 +6,100 @@
         <link href="/css/reset.css" rel="stylesheet">
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
-        <link href="/css/corkboard.css" rel="stylesheet">
+        <link href="/css/board.css" rel="stylesheet">
         <title>Cork board</title>   
     </head>
     <body>
-        <div id="main-wrapper">
+        <div class="main-wrapper">
         	
             <!-- Fetch each notepaper from notepaper table --> 
-			<a id="note-1" class="note note-while col-lg-3">
+			<div class="note-row">
+			<div class="note-grid">
+			<a id="note-1" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-2" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-2" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-3" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-3" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-4" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-4" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a> 
-
-			<a id="note-5" class="note note-while col-lg-3">
+			</div>
+			</div>
+			<div class="note-row">
+			<div class="note-grid">
+			<a id="note-5" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-6" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-6" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-7" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-7" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-			
-			<a id="note-8" class="note note-while col-lg-3">
+			</div>
+			<div class="note-grid">
+			<a id="note-8" class="note note-white">
 				<div class="pin"></div>
 				<div class="content-container">
 				</div>
 			</a>
-                
+			</div>
+            </div>
+			<div class="bottom-row">
+				<div class="bottom-grid">
+					<a id="note-9" class="note note-white">
+						<div id='qrcode'>
+						</div>
+					</a>
+				</div>
+				<div class="bottom-grid">
+					<a id="note-10" class="note note-white">
+						
+					</a>
+				</div>
+			</div>
+			<!--
             <a class="qr-label">
                	<div class="text">
                		Want to Post ?
                	</div>
                	
         		<div class="text">
-               		Scan here -->
+               		Scan here ->
                	</div>
 				
 				<div id='qrcode'>
 				</div>
         	</a>
-                
+            -->
         </div><!-- End of wrapper -->
         <div>
         	
@@ -114,10 +140,13 @@
                 }, 3000);
 				
 				updateMessages();
+				
+				var QRHeight = $('#note-9').height();
+				
 				new QRCode(document.getElementById("qrcode"), {
 					text: base_url+"message/create",
-					width: 172,
-					height: 172,
+					width: QRHeight,
+					height: QRHeight,
 					colorDark : "#000000",
 					colorLight : "#ffffff",
 					correctLevel : QRCode.CorrectLevel.H
