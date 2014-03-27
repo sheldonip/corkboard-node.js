@@ -295,11 +295,11 @@
 		// end of url check
 		
 		// Check any uploads still stored in localstorage
-		if(uploads.imageName && uploads.imageName.length > 0){
+		if(uploads && uploads.imageName && uploads.imageName.length > 0){
 			$('#type').val("3");
-		} else if (uploads.videoName && uploads.videoName.length > 0){
+		} else if (uploads && uploads.videoName && uploads.videoName.length > 0){
 			$('#type').val("5");
-		} else if (uploads.videoId && uploads.videoId.length > 0){
+		} else if (uploads && uploads.videoId && uploads.videoId.length > 0){
 			$('#type').val("4");
 		} else {
 			$('#type').val("1");

@@ -163,6 +163,7 @@ app.get('/process/updateMessages', function (req, res) {
 	
 	// Use the connection
 	connection.query('SELECT * FROM message M, notepaper N WHERE M.id = N.message_id', function(err, rows){	
+		if (err) throw err;
 		objToJson.notepapers = JSON.stringify(rows);
 		// return JSON response
 		res.json(objToJson);
