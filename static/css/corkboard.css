@@ -139,6 +139,8 @@ form ul.videoList li{ position: relative;}
 	height: 60px;
 	background-size: cover;
 	background-position: 50% 20%;
+	border: 5px solid white;
+	box-shadow: 3px 3px 3px #333333;
 }
 form div.content-container{
     max-height: none;
