@@ -7,6 +7,8 @@ var im = require('imagemagick');
 var fs = require('fs');
 var sys = require('sys')
 var exec = require('child_process').exec;
+var request = require('request');
+var cheerio = require("cheerio");
 
 // Include the express body parser
 app.configure(function () {
@@ -34,7 +36,7 @@ io.sockets.on('connection', function (socket) {
 		var msgId;
 		console.log('[DEBUG] saveMessages');
 	// Use the connection
-		var post  = {type: parseInt(data.type), content: data.content};
+		var post  = {type: parseInt(data.type), content: data.content, img: data.img, video: data.video, url: data.url, url_title: data.url_title, url_summary: data.url_summary, url_thumbnail: data.url_thumbnail };
 		var query = connection.query('INSERT INTO message SET ?', post, function(err, result) {
 			msgId = result.insertId;
 			
@@ -46,9 +48,90 @@ io.sockets.on('connection', function (socket) {
 		
 	});
 	
+	//fetch all messages
+	socket.on('fetchAllNotepapers', function (data) {
+		var notepapers = {};	
+		console.log('[DEBUG] fetchAllNotepapers');
+	
+		// Use the connection
+		connection.query('SELECT * FROM message M, notepaper N WHERE M.id = N.message_id', function(err, rows){	
+			if (err) throw err;
+			// return JSON response
+			socket.emit('updateMsg', rows);
+		});	
+	
+	
+	});
+	
 	//forward the message to the corkboard
 	socket.on('updateMsg', function (data) {
 		io.sockets.emit('updateMsg', data);
+	});
+	
+	
+	//scrape the information of an url
+	socket.on('scrapeUrl', function (url) {
+		var urlMatch = url.match(/(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/);
+		
+		var youtubeMatch = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
+		
+		var preview = {};
+		
+		if(youtubeMatch){
+			console.log("youtube matched");
+			var videoId = youtubeMatch[1];
+			request('http://gdata.youtube.com/feeds/api/videos/'+videoId+'?v=2&alt=jsonc', function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					var youtubeObject = JSON.parse(body);
+					preview.thumbnail = youtubeObject.data.thumbnail.sqDefault;
+					preview.title = youtubeObject.data.title;
+					preview.summary = youtubeObject.data.description.substr(0, 100);
+					preview.url = url;
+					socket.emit('scrapeUrlResult', preview);
+				}
+			});
+		}
+		else if (urlMatch) {
+			console.log("url matched "+ url);
+			
+			request({
+				uri: url,
+			}, function(error, response, body) {
+				console.log("url fetched ");
+				var $ = cheerio.load(body);
+				var meta = $('meta')
+				var keys = Object.keys(meta)
+				var summary = null;
+				var title = null;
+				var thumbnail = null;
+	
+				keys.forEach(function(key){
+				if (  meta[key].attribs && meta[key].attribs.property && meta[key].attribs.property === 'og:title') {
+					title = meta[key].attribs.content;
+				}
+				});
+
+				keys.forEach(function(key){
+				if (  meta[key].attribs && meta[key].attribs.property && meta[key].attribs.property === 'og:description') {
+					summary = meta[key].attribs.content;
+				}
+				});
+	
+				keys.forEach(function(key){
+				if (  meta[key].attribs && meta[key].attribs.property && meta[key].attribs.property === 'og:image') {
+					thumbnail = meta[key].attribs.content;
+				}
+				});
+
+				preview.title = (title) ? title : $('title').html();
+				preview.summary = (summary) ? summary : $('meta[name=description]').attr("content");
+				preview.thumbnail = (thumbnail) ? thumbnail : null;
+				preview.url = url;
+				socket.emit('scrapeUrlResult', preview);
+				
+			});
+			
+		}
 	});
 	
 	//client fetch empty notepaper
@@ -203,6 +286,7 @@ app.get('/process/resetNotepapers', function (req, res) {
 		res.json(objToJson);
 	});	
 });
+
 //***TO-DO: Handle messages with null expire date
 
 // ----------------------------------uploads' logic

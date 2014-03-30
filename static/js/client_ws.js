@@ -43,6 +43,12 @@
 			//Process incoming notepaper
 			this.socket.on('occupyNotepaperResult', this.occupyNotepaperResult);
 			
+			//Process url scraper result
+			this.socket.on('scrapeUrlResult', this.scrapeUrlResult);
+			
+			//Process query result
+			this.socket.on('queryPositionsHandler', this.queryPositionsHandler);
+			
 			//Process query result
 			this.socket.on('queryPositionsHandler', this.queryPositionsHandler);
 			
@@ -61,81 +67,123 @@
 		
 		// Sends a message to the server
 		updateMsg : function() {
-			var content = {};
-			var id = parseInt($('#notepaperId').val());
-			var type = parseInt($('#type').val());
-			var uploads = JSON.parse(localStorage.getItem('uploads'));
+			var message = {};
+			message.id = parseInt($('#notepaperId').val());
+			message.type = parseInt($('#type').val());
+			message.content = $('#textContent').val();
+			//console.log('update '+content);
+			
+			var url = $('#url').val();
+			var url_title = $('#urlTitle').val();
+			var url_summary = $('#urlSummary').val();
+			var url_thumbnail = $('#urlThumbnail').val();
+			var img = JSON.parse(localStorage.getItem('img'));
+			var video = JSON.parse(localStorage.getItem('video'));
 			
 			// Check id
-			if(id < maxId && id <= 0){
+			if(message.id < maxId && message.id <= 0){
 				return false;
 			}
 			// Prepare the content
-			if(type == 1){ //Text
-				content.content = $('#textContent').val();
-			} else if(type==3){ //Gallery			
-				content.content = $('#textContent').val();
-				content.img = uploads.imageName;
-			} else if(type==4){ //Youtube
-				content.content = $('#textContent').val();
-				content.videoId = uploads.videoId;
-			} else if(type==5){ //Video
-				content.content = $('#textContent').val();
-				content.video = uploads.videoName;
-			} else if(type==6){ //Canvas
-				content.content = $('#textContent').val();
+			if(message.type==1){
+			
+			}
+			else if(message.type==3){ //Gallery
+				message.img = img;
+			} else if(message.type==4){ //Url
+				message.url = url;
+				message.url_title = url_title;
+				message.url_summary = url_summary;
+				message.url_thumbnail = url_thumbnail;
+			} else if(message.type==5){ //Video
+				message.video = video;
 			} else {
 				console.log('Invalid type');
 				return false;
 			}
 			// Send message
-			this.socket.emit('updateMsg', {
-				id: id,
-				type: type,
-				content: JSON.stringify(content)
-			});
+			this.socket.emit('updateMsg', [message]);
 			
 			return false;
 		},
 		
 		//save message to mysql db
 		saveMsg : function() {
-			console.log('save begin');
-			var content = {};
-			var id = parseInt($('#notepaperId').val());
-			var type = parseInt($('#type').val());
-			var uploads = JSON.parse(localStorage.getItem('uploads'));
+			var message = {};
+			message.id = parseInt($('#notepaperId').val());
+			message.type = parseInt($('#type').val());
+			message.content = $('#textContent').val();
+			//console.log('update '+content);
+			
+			var url = $('#url').val();
+			var url_title = $('#urlTitle').val();
+			var url_summary = $('#urlSummary').val();
+			var url_thumbnail = $('#urlThumbnail').val();
+			var img = JSON.parse(localStorage.getItem('img'));
+			var video = JSON.parse(localStorage.getItem('video'));
 			
 			// Check id
-			if(id < maxId && id <= 0){
+			if(message.id < maxId && message.id <= 0){
 				return false;
 			}
 			// Prepare the content
-			if(type == 1){ //Text
-				content.content = $('#textContent').val();
-			} else if(type==3){ //Gallery
+			if(message.type==1){
 			
-				content.content = $('#textContent').val();
-				content.img = uploads.imageName;
-			} else if(type==4){ //Youtube
-			
-			} else if(type==5){ //Video
-			
-			} else if(type==6){ //Canvas
-			
+			}
+			else if(message.type==3){ //Gallery
+				message.img = img;
+			} else if(message.type==4){ //Url
+				message.url = url;
+				message.url_title = url_title;
+				message.url_summary = url_summary;
+				message.url_thumbnail = url_thumbnail;
+			} else if(message.type==5){ //Video
+				message.video = video;
 			} else {
 				console.log('Invalid type');
 				return false;
 			}
-			 
 			//send save message
 			this.socket.emit('saveMsg', {
 				id: id,
 				type: type,
-				content: JSON.stringify(content)
+				content: JSON.stringify(message)
 			});
 			
 			return false;
+		},
+		
+		//Ask the server side to scrape the url
+		scrapeUrl: function(url) {
+			this.socket.emit('scrapeUrl', url);
+		},
+		
+		scrapeUrlResult: function(url) {
+			if(url.title || url.summary){ //if the website exists
+				$('#url').val(url.url);
+				$('#urlTitle').val(url.title);
+				$('#urlSummary').val(url.summary);
+				$('#urlThumbnail').val(url.thumbnail);
+				localStorage.setItem('url', JSON.stringify(url));
+				
+				//append the information to the link preview div
+				var holder = $("#linkPreview");
+				holder.empty();	
+				holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
+				if(url.thumbnail){
+					holder.append('<div class="thumbnailHolder"><img class="urlThumbnail" src="'+ url.thumbnail +'" /></div>');
+				}
+				holder.append('<div class="urlTitle"><h5><a target="_blank" href="'+ url.url +'">' + url.title + '</a></h5></div>');
+				if(url.summary){
+					holder.append('<div class="urlDescription">'+url.summary+'</div>');
+				}
+				// Update UI
+				$('#linkPreview').css('padding','2%');
+				$('#linkPreview').css('border','1px solid #CCCCCC');
+				$('#type').val("4");
+				console.log("scrape");
+				Create.updateMsg();
+			}
 		},
 		
 		occupyNotepaper: function() {

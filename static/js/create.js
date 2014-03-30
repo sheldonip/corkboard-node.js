@@ -43,7 +43,7 @@
 				notepaperInner.push('<div class="text">'+content.content+'</div>');
 												
 			} else if(type==2){
-				
+				alert("hi");
 				//notepaperInner.push('<div class="image">');
 				notepaperInner.push('<img class="notepaper-img" src="'+base_url+'uploads/resized/'+ content.img +'">');
 				notepaperInner.push('<div class="text">'+content.content+'</div>');
@@ -67,10 +67,24 @@
 			   notepaperInner.push('<div class="text">'+content.content+'</div>');
 			   
 			} else if(type==4){
-				
 				notepaperInner.push('<div class="notepaper-youtube">');
-				notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+content.videoId+'?autoplay=1&controls=0&loop=1&playlist='+content.videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
-				notepaperInner.push('</div>');
+				alert(content.url);
+				var youtubeMatch = content.url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
+				if(youtubematch){
+					var videoId = youtubeMatch[1];
+					notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+videoId+'?autoplay=1&controls=0&loop=1&playlist='+videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
+					notepaperInner.push('</div>');
+				}else{
+					notepaperInner.push('<div class="boardLinkPreview">');
+					if(content.url_thumbnail){
+						notepaperInner.push('<div class="thumbnailHolder">');
+						notepaperInner.push('<img class="urlThumbnail" src="'+content.url_thumbnail+'">');
+						notepaperInner.push('</div>');
+					}
+					notepaperInner.push('<div class="urlTitle"><h5><a target="_blank" href="'+content.url+'">'+content.url_title+'</a></h5></div>');
+					notepaperInner.push('<div class="urlDescription">'+content.url_summary || '' +'</div>');
+					notepaperInner.push('</div>');
+				}
 				notepaperInner.push('<div class="text">'+content.content+'</div>');
 				
 			} else if(type==5){

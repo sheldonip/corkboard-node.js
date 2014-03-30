@@ -54,11 +54,10 @@
 			<div class="form-group">
 				<textarea class="form-control" id="textContent" name="content" rows="3" required></textarea>
 			</div>
+			<div id="linkPreview"></div>
 			<div class="content-container">
                 <ul class="table" id="imgList"></ul>
-                <ul class="videoList table">
-					<li id="youtube"></li>
-				</ul>
+                <ul class="table" id="videoList"></ul>
             </div>
             <div class="form-group">
             	<label for="type">Current Type:</label>
@@ -72,7 +71,10 @@
             </div>
 			<input type="hidden" name="id" id="" value="<?php echo (int)$messageId; ?>" />
 			<input type="hidden" name="videoId" id="videoId" value="" />
-			<input type="hidden" name="imagesName" id="imagesName" value="" />
+			<input type="hidden" name="url" id="url" />
+			<input type="hidden" name="urlTitle" id="urlTitle" />
+			<input type="hidden" name="urlSummary" id="urlSummary" />
+			<input type="hidden" name="urlThumbnail" id="urlThumbnail" />
 			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
 			<input type="hidden" name="messageId" id="messageId" value="" />
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
@@ -185,16 +187,26 @@
 			$('form.videoForm').attr('action', base_url+'upload/uploadVideo');
 			
 			//Fetch all the data from the local storage
-			var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+			var uploadedImg = JSON.parse(localStorage.getItem('img'));
+			var uploadedVideo = JSON.parse(localStorage.getItem('video'));
 			var text = localStorage.getItem('text');
 			var type = localStorage.getItem('type');
 			var notepaperId = localStorage.getItem('notepaperId');
 			
+			//Fetch all the uploaded image thumbnails
 			var imgList = $('#imgList');
-			if(uploadedImg != null && uploadedImg.imageName){
-				var uploadedImgLength = uploadedImg.imageName.length;
+			if(uploadedImg != null){
+				var uploadedImgLength = uploadedImg.length;
 				for(var i=0; i < uploadedImgLength; i++){
-					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg.imageName[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg.imageName[i]+'" /></li>');
+					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg[i]+'" /></li>');
+				}
+			}
+			//Fetch all the uploaded video thumbnails
+			var videoList = $('#videoList');
+			if(uploadedVideo != null){
+				var uploadedVideoLength = uploadedVideo.length;
+				for(var i=0; i < uploadedVideoLength; i++){
+					videoList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/video/'+ uploadedVideo[i].replace('.mp4','.jpg') +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedVideo[i]+'" /></li>');
 				}
 			}
 			if(text!=null){
@@ -203,9 +215,9 @@
 			if(type!=null){
 				$('#type').val(type);
 			}
-		});
 			
-						
+			
+		});
 			//customize upload button
 			$('#uploadImgBtn').click(function(){
         		// Simulate a click on the file input button
@@ -229,84 +241,24 @@
 			
 		// Upload text messages
 	$('#textContent').keyup(function(evt) {	
-		// url check
-		var string = $(this).val();
-		var youtubematch = string.match(/((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtube\.com)\/[^\s]+/g);
-		var youtubematch1 = string.match(/((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)\/[^\s]+/g);
-		var holder = $("div.content-container ul.videoList li#youtube");
-		var idField = $('#videoId');
-		var a = $('<a>', { href:youtubematch1 } )[0];
-		var videoId;
-		var uploads = JSON.parse(localStorage.getItem('uploads'));
-		
-		if(youtubematch1!=null){
-			videoId = a.pathname.slice(1);
-		} else if(youtubematch!=null) {
-			videoId = getParameterByName('v',youtubematch);
-		} else {}
-		
-		console.log('[DEBUG] videoId: ' + videoId);
-		
-		//if the input url is a valid youtube url and it is the first time for it to appear
-		if((youtubematch!=null || youtubematch1!=null)){
-			holder.empty();	
-			if(!videoId){
-				return false; 
-			}
-			$.ajax({
- 				url: 'http://gdata.youtube.com/feeds/api/videos/'+videoId,
-				type: "GET",
-				data: { v: "2", alt: "jsonc"},
-				dataType: "jsonp",
-				success: function(youtube) {
-					if(youtube.status=="error"){
-						alert(youtube.msg);
-					} else { 
-						var uploads = JSON.parse(localStorage.getItem('uploads')) || {};
-						holder.empty();	
-						if(youtube.data){
-							holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
-							holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
-							holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
-							holder.append('<div class="youtubeDescription">'+youtube.data.description.substr(0, 125)+'</div>');
-							holder.append('</li>');
-							// Update UI
-							$('form div.content-container ul.videoList > li').css('padding','2%');
-							$('form div.content-container ul.videoList > li').css('border','1px solid #CCCCCC');
-							
-							idField.attr('value', youtube.data.id);
-							//$('#textTitle').attr('value', data.title);
-							
-							uploads.videoId = videoId;
-							localStorage.setItem('uploads', JSON.stringify(uploads));
-							$('#type').val("4");
-							Create.updateMsg();
-						}
-						
-					}
-				},
-  
-				error: function() {
-					alert("ERROR!!!");
-				}
-			});
-			
-		}
-		// end of url check
-		
-		// Check any uploads still stored in localstorage
-		if(uploads && uploads.imageName && uploads.imageName.length > 0){
-			$('#type').val("3");
-		} else if (uploads && uploads.videoName && uploads.videoName.length > 0){
-			$('#type').val("5");
-		} else if (uploads && uploads.videoId && uploads.videoId.length > 0){
-			$('#type').val("4");
-		} else {
-			$('#type').val("1");
-		}
-	
 		Create.updateMsg();
+		
+		
+		// check if it is an url
+		var string = $(this).val();
+		var urlMatch = null;
+		if($('#linkPreview > *').length == 0){
+			urlMatch = string.match(/(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/);
+		}
+		
+		if(urlMatch){ //if it is an url, ask server side to scrape the url
+			Create.scrapeUrl(string);
+			$('#linkPreview').append('<img id="loading" src="'+base_url+'img/load.gif" alt="loading"/>');
+			console.log("url matched");
+		}
+		
 		return false;
+		
 	});		
 			
 			
@@ -338,7 +290,7 @@
                      	galleryForm.clearForm();
                      	progressBar.width('0%');
                      	var data = JSON.parse(xhr.responseText);
-						var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+						var uploadedImg = JSON.parse(localStorage.getItem('img'));
                      	if(data.status=="error"){
                          	alert(data.status);
                         }else{
@@ -349,15 +301,14 @@
                             $('#my-progress').hide();
 							
 							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-							if(uploadedImg == null || uploadedImg.imageName == null){
-								uploadedImg = {};
-								uploadedImg.imageName = [];
-								uploadedImg.imageName[0] = data.imageName;
+							if(uploadedImg == null){
+								uploadedImg = [];
+								uploadedImg[0] = data.imageName;
 							}
 							else{ //append the newly uploaded image to the local storage
-								uploadedImg.imageName.push(data.imageName);
+								uploadedImg.push(data.imageName);
 							}
-							localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+							localStorage.setItem('img', JSON.stringify(uploadedImg));
 							Create.updateMsg();
                         }
                          	
@@ -373,7 +324,7 @@
 				var videoForm = $(this);
 				//var videoHolder = $(this).parent();
 				//var urlField = $(this).parent().next('.gridVideoForm').children('[name="url"]');
-				var videoList = $('.videoList');
+				var videoList = $('#videoList');
 				var progressBar = $('#my-progress').children('.progress-bar');
 				$(this).ajaxSubmit({
 						beforeSend: function() {
@@ -387,27 +338,26 @@
 						},
 						complete: function(xhr) {
 							var data = JSON.parse(xhr.responseText);
-							var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
+							var uploadedVideo = JSON.parse(localStorage.getItem('video'));
 							videoForm.clearForm();
 							progressBar.width('0%');
 							if(data.status=="error"){
 								console.log(data.msg);
 							}else{
-								videoList.append('<li class="image"><div class="removeThumbnail">&times;</div><div class="uThumbnail" style="background-image: url(' +base_url+'uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
+								videoList.append('<li class="image"><a class="removeThumbnail">&times;</a><div class="uThumbnail" style="background-image: url(' +base_url+'uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
 								$('#type').val("5");
 								$('#my-progress').hide();
 								$('#uploadVideoBtn').hide();
 								
 								//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-								if(uploadedVideo == null || uploadedVideo.videoName == null){
-									uploadedVideo = {};
-									uploadedVideo.videoName = [];
-									uploadedVideo.videoName[0] = data.msg;
+								if(uploadedVideo == null){
+									uploadedVideo = [];
+									uploadedVideo[0] = data.msg;
 								}
 								else{ //append the newly uploaded image to the local storage
-									uploadedVideo.videoName.push(data.msg);
+									uploadedVideo.push(data.msg);
 								}
-								localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+								localStorage.setItem('video', JSON.stringify(uploadedVideo));
 								
 								//Boardcast update
 								Create.updateMsg();
@@ -422,12 +372,12 @@
     $('body').on('click', '#imgList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-			var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
-    		var uploadedImgLength = uploadedImg.imageName.length;
+			var uploadedImg = JSON.parse(localStorage.getItem('img'));
+    		var uploadedImgLength = uploadedImg.length;
 			for(var i=0; i < uploadedImgLength; i++){
 				if(uploadedImg.imageName[i] == $(this).parent().find('.imgUrl').attr('value')){
 					uploadedImg.imageName.splice(i, 1);
-					localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+					localStorage.setItem('img', JSON.stringify(uploadedImg));
 					
 				}	
 			}
@@ -440,15 +390,15 @@
    	});   	
    	
 	//remove the thumbnail of uploaded video
-	$('body').on('click', '.videoList .removeThumbnail', function(evt) {
+	$('body').on('click', '#videoList .removeThumbnail', function(evt) {
     		$(this).parent().remove();
 			
-			var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
-    		var uploadedVideoLength = uploadedVideo.videoName.length;
+			var uploadedVideo = JSON.parse(localStorage.getItem('video'));
+    		var uploadedVideoLength = uploadedVideo.length;
 			for(var i=0; i < uploadedVideoLength; i++){
 				if(uploadedVideo.videoName[i] == $(this).parent().find('.videoUrl').attr('value')){
 					uploadedVideo.videoName.splice(i, 1);
-					localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+					localStorage.setItem('video', JSON.stringify(uploadedVideo));
 					
 				}	
 			}
@@ -461,87 +411,23 @@
     	
    	});   
    	
-   	//Paste Youtube URL
-   	/*$('body').on('change', '#youtubeUrl', function(evt) {
-    	var site= $(this).val();
-		var match = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtube\.com)/g);
-		var match1 = site.match(/^((http:\/\/)|(https:\/\/)){0,1}(www\.){0,1}(youtu\.be)/g);
-		var holder = $(this).next();
-		var idField = $('#videoId');
-		var a = $('<a>', { href:site } )[0];
-		var videoId;
-		var uploads = JSON.parse(localStorage.getItem('uploads'));
-		
-		if(match1!=null){
-			videoId = a.pathname.slice(1);
-		} else {
-			videoId = getParameterByName('v',site);
-		}
-		console.log('[DEBUG] videoId: ' + videoId);
-		
-		//if the input url is a valid youtube url and it is the first time for it to appear
-		if((match!=null || match1!=null)){
-			holder.empty();	
-			$.ajax({
- 				url: 'http://gdata.youtube.com/feeds/api/videos/'+videoId,
-				type: "GET",
-				data: { v: "2", alt: "jsonc"},
-				dataType: "jsonp",
-				success: function(youtube) {
-					if(youtube.status=="error"){
-						alert(youtube.msg);
-					} else { 
-						var uploads = JSON.parse(localStorage.getItem('uploads')) || {};
-						holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
-						holder.append('<div class="thumbnailHolder"><img class="youtubeThumbnail" src="'+ youtube.data.thumbnail.sqDefault +'" /></div>');
-						holder.append('<div class="youtubeTitle"><h5><a target="_blank" href="http://www.youtube.com/watch?v='+ youtube.data.id +'">' + youtube.data.title + '</a></h5></div>');
-						holder.append('<div class="youtubeDescription">'+youtube.data.description.substr(0, 125)+'</div>');
-						// Update UI
-                        $('div.youtubeHolder').css('padding','2%');
-                        $('div.youtubeHolder').css('border','1px solid #CCCCCC');
-						
-						idField.attr('value', youtube.data.id);
-						//$('#textTitle').attr('value', data.title);
-						
-						uploads.videoId = videoId;
-						localStorage.setItem('uploads', JSON.stringify(uploads));
-						$('#type').val("4");
-						Create.updateMsg();
-						
-					}
-				},
-  
-				error: function() {
-					alert("ERROR!!!");
-				}
-			});
-			
-		}
-	});*/
-	
-	//remove the youtube holder
+   		
+	//remove the url preview holder
 	$('body').on('click', '.removeYoutube', function(evt) {
 		evt.preventDefault();
-		var uploadedVideo = JSON.parse(localStorage.getItem('uploads'));
-    	var uploadedVideoLength = uploadedVideo.videoId.length;
-		if(uploadedVideoLength > 0){
-			uploadedVideo.videoId = [];
-			localStorage.setItem('uploads', JSON.stringify(uploadedVideo));
+		var url = JSON.parse(localStorage.getItem('url'));
+		if(url!=null){
+			url;
+			localStorage.setItem('url', null);
 		}
 	
 	    // Update UI
-	    $('form div.content-container ul.videoList > li').css('padding','0%');
-	    $('form div.content-container ul.videoList > li').css('border','0');
+	    $('#linkPreview').css('padding','0%');
+	    $('#linkPreview').css('border','0');
     	$(this).parent().children().remove();
    	});
    	
-   	//submit after save youtube url
-   	$("#save-youtube").on("click", function() {
-		$('#type').val("4");
-		Create.updateMsg();
-		//$('#msgForm').submit();
-	});
-	
+   	
 	//sketchpad
 	$(function() {
     	$.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
@@ -567,7 +453,7 @@
 					},
 					dataType : "json"
 				}).done(function(data) {
-					var uploadedImg = JSON.parse(localStorage.getItem('uploads'));
+					var uploadedImg = JSON.parse(localStorage.getItem('img'));
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
 					$('#type').val("3");
 					canvasData = "";
@@ -580,7 +466,7 @@
 							else{ //append the newly uploaded image to the local storage
 								uploadedImg.imageName.push(data.imageName);
 							}
-							localStorage.setItem('uploads', JSON.stringify(uploadedImg));
+							localStorage.setItem('img', JSON.stringify(uploadedImg));
 							Create.updateMsg();
 
 				});

@@ -133,7 +133,7 @@ div.imgholder img{
 }
 
 form #imgList li,
-form ul.videoList li{ position: relative;}
+form #videoList li{ position: relative;}
 .uThumbnail {
 	width: 58px;
 	height: 60px;
@@ -151,19 +151,14 @@ form div.content-container{
     *overflow-y: hidden;
     overflow: hidden;
 }
-form div.content-container #imgList > li{
+form div.content-container #imgList > li,
+form div.content-container #videoList > li
+{
     *width: 48%;    
     margin-right: 3px;
     display: inline-block;
 }
 
-form div.content-container ul.videoList > li{
-	width: 95%;    
-    margin-right: 3px;
-    display: inline-block;
-	background-color: #FFFFFF;
-	border-radius: 6px;
-}
 form div.content-container #imgList > li > button{
     margin-top: 2%;
     margin-bottom: 10%;
@@ -172,13 +167,16 @@ form div.content-container #imgList > li > button{
 	width: 1024px;
 }
 
-form div.youtubeHolder{
+#linkPreview{
     background-color: #FFFFFF;
     border-radius: 4px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
     margin-bottom: 5%;    
     padding: 0%
     border: 0;
+}
+.urlThumbnail{
+	height: 90px;
 }
 button.removeYoutube{ 
 	float: right; 
