@@ -5,7 +5,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link href="/css/reset.css" rel="stylesheet">
         <!-- Bootstrap -->
-        <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <!-- <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen"> -->
+        <link href="/css/jquery.mobile-1.4.2.min.css" rel="stylesheet" media="screen">
         <link href="/css/corkboard.css" rel="stylesheet">
         <link href="/css/sketch.css" rel="stylesheet" media="screen">
 
@@ -16,22 +17,28 @@
 		<![endif]-->
 	</head>
 	<body>
-	    <div id="wrapper" class="col-lg-12">
-	    
-        <h1>Post Message</h1>
-		<div class="imgholder">
-			<button type="button" id="uploadImgBtn" class="btn btn-primary btn-lg">
+		<div data-role="page">
+	
+		<div data-role="header">
+			<h1>Post Message</h1>
+		</div>
+		
+		<div role="main" class="ui-content">
+	    <div id="wrapper">   
+        
+		<div class="imgholder cf">
+			<a id="uploadImgBtn" class="btn btn-primary btn-lg">
 				Image
 				<span class="glyphicon glyphicon-camera"></span>
-			</button>
-			<button type="button" id="uploadVideoBtn" class="btn btn-success btn-lg">
+			</a>
+			<a id="uploadVideoBtn" class="btn btn-success btn-lg">
 				Video
 				<span class="glyphicon glyphicon-facetime-video"></span>
-			</button>
-			<button class="btn btn-info btn-lg" data-toggle="modal" data-target="#sketchModal">
+			</a>
+			<a id="sketchBtn" class="btn btn-info btn-lg" href="#sketchModal" data-rel="popup" data-position-to="window" data-transition="pop">
 				Sketch
 				<span class="glyphicon glyphicon-picture"></span>
-			</button>
+			</a>
 			<button id="btn-youtube" class="btn btn-danger btn-lg" data-toggle="modal" data-target="#youtubeModal">Youtube</button>
 			
 			<!-- ***TO-DO: Handle multiple images -->
@@ -86,14 +93,14 @@
 		</button>
 		-->
 		
-		<button type="button" id="positionBtn" class="btn btn-default btn-lg" data-toggle="modal" data-target="#positionModal">
+		<a id="positionBtn" class="btn btn-default btn-lg" href="#positionModal" data-rel="popup" data-position-to="window" data-transition="pop">
 			Change Notepaper
-		</button>
+		</a>
 		
         </div>
         
         
-        <div class="modal fade" id="youtubeModal" tabindex="-1" role="dialog" aria-labelledby="youtubeModalLabel" aria-hidden="true">
+        <!-- <div class="modal fade" id="youtubeModal" tabindex="-1" role="dialog" aria-labelledby="youtubeModalLabel" aria-hidden="true">
   			<div class="modal-dialog">
     			<div class="modal-content">
       				<div class="modal-header">
@@ -107,68 +114,57 @@
       				<div class="modal-footer">
         				<button type="button" id="save-youtube" data-dismiss="modal" class="btn btn-primary">Save changes</button>
       				</div>
-    			</div><!-- /.modal-content -->
-  			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
+    			</div>
+  			</div>
+		</div> -->
         
         
-        <div class="modal fade" id="sketchModal" tabindex="-1" role="dialog" aria-labelledby="sketchModalLabel" aria-hidden="true">
-  			<div class="modal-dialog">
-    			<div class="modal-content">
-      				<div class="modal-header">
-      					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        				<h4 class="modal-title" id="myModalLabel">Sketch</h4>
-      				</div>
-      				<div class="modal-body" id="canvas-holder">
-        					<div class="tools">
-        					</div>
-							<canvas id="sketchpad" width="270" height="296">
-							</canvas>
-						
-      				</div>
-      				<div id="canvas-footer" class="modal-footer">
-      					<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
-        				<button type="button" id="save-sketch" data-dismiss="modal" class="btn btn-primary">Save changes</button>
-      				</div>
-    			</div><!-- /.modal-content -->
-  			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
+        <div class="modal fade" id="sketchModal" data-role="popup">
+			<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+			<div data-role="header" data-theme="a">
+				<h1>Sketch</h1>
+			</div>
+			<div role="main" class="ui-content" id="canvas-holder">
+				<div class="tools"></div>
+				<canvas id="sketchpad" width="270" height="296"></canvas>
+			</div>
+			<div role="footer" id="canvas-footer" class="modal-footer">
+      			<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
+        		<button type="button" id="save-sketch" data-dismiss="modal" class="btn btn-primary">Save</button>
+      		</div>
+		</div>
 		
-		<div class="modal fade" id="positionModal" tabindex="-1" role="dialog" aria-labelledby="positionModalLabel" aria-hidden="true">
-  			<div class="modal-dialog">
-    			<div class="modal-content">
-      				<div class="modal-header">
-      					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        				<h4 class="modal-title" id="myModalLabel">Choose position</h4>
-      				</div>
-      				<div class="modal-body" id="canvas-holder">
-						<div>
-							<div class="note-thumb" position="1"></div>
-							<div class="note-thumb" position="2"></div>
-							<div class="note-thumb" position="3"></div>
-							<div class="note-thumb" position="4"></div>
-							<div class="note-thumb" position="5"></div>
-							<div class="note-thumb" position="6"></div>
-							<div class="note-thumb" position="7"></div>
-							<div class="note-thumb" position="8"></div>
-						</div>
-					</div>
-      				<div id="canvas-footer" class="modal-footer">
-      					<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
-        				<button type="button" id="save-sketch" data-dismiss="modal" class="btn btn-primary">Save changes</button>
-      				</div>
-    			</div><!-- /.modal-content -->
-  			</div><!-- /.modal-dialog -->
-		</div><!-- /.modal -->
+		<div class="modal fade" id="positionModal" data-role="popup">
+			<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+			<div data-role="header" data-theme="a">
+				<h1>Choose position</h1>
+			</div>
+			<div role="main" class="ui-content" id="canvas-holder">
+				<div class="note-thumb-container cf">
+					<div class="note-thumb" position="1"></div>
+					<div class="note-thumb" position="2"></div>
+					<div class="note-thumb" position="3"></div>
+					<div class="note-thumb" position="4"></div>
+					<div class="note-thumb" position="5"></div>
+					<div class="note-thumb" position="6"></div>
+					<div class="note-thumb" position="7"></div>
+					<div class="note-thumb" position="8"></div>
+				</div>
+			</div>		
+		</div>
         
 		<a href='#sketchpad' data-clear='true' id="real-clear-canvas">Clear</a>
+		</div><!-- /content -->
+		
+		</div><!-- /page -->
 		
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="/js/jquery-1.10.2.js"></script>
 		<!-- For upload form of photo gallery -->
 		<script src="/js/jquery.form.min.js"></script>
+		<script src="/js/jquery.mobile-1.4.2.min.js"></script>
 		<!-- Include all compiled plugins (below), or include individual files as needed -->
-		<script src="/js/bootstrap.min.js"></script>		
+		<!-- <script src="/js/bootstrap.min.js"></script>	 -->	
 		
 		<!-- Socket.io -->
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
@@ -200,6 +196,11 @@
 				for(var i=0; i < uploadedImgLength; i++){
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg[i]+'" /></li>');
 				}
+				if(uploadedImgLength > 0){
+					// Change option
+					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
+					$('#type').selectmenu("refresh", true);
+				}
 			}
 			//Fetch all the uploaded video thumbnails
 			var videoList = $('#videoList');
@@ -208,12 +209,19 @@
 				for(var i=0; i < uploadedVideoLength; i++){
 					videoList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/video/'+ uploadedVideo[i].replace('.mp4','.jpg') +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedVideo[i]+'" /></li>');
 				}
+				if(uploadedVideoLength > 0){
+					$('#uploadVideoBtn').hide();
+					// Change option
+					$('#type').val("5").attr('selected', true).siblings('option').removeAttr('selected');
+					$('#type').selectmenu("refresh", true);
+				}
 			}
 			if(text!=null){
 				$('#textContent').val(text);
 			}
 			if(type!=null){
-				$('#type').val(type);
+				$('#type').val(type).attr('selected', true).siblings('option').removeAttr('selected');
+				$('#type').selectmenu("refresh", true);
 			}
 			
 			
@@ -268,7 +276,7 @@
   		evt.preventDefault();
   		var galleryForm = $(this);
   		var imgList = $('#imgList');
-  		var filename = $(this).children('#messageImg').val().split('/').pop().split('\\').pop();
+  		var filename = $('#messageImg').val().split('/').pop().split('\\').pop();
   		var progressBar = $('#my-progress').children('.progress-bar');
                  $(this).ajaxSubmit({                 	
                     beforeSend: function() {
@@ -296,14 +304,15 @@
                         }else{
 							imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
 							
-							
-                            $('#type').val("3");
+							// Change option
+                            $('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
+							$('#type').selectmenu("refresh", true);
                             $('#my-progress').hide();
 							
 							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
 							if(uploadedImg == null){
-								uploadedImg = [];
-								uploadedImg[0] = data.imageName;
+								uploadedImg = []
+								uploadedImg.push(data.imageName);
 							}
 							else{ //append the newly uploaded image to the local storage
 								uploadedImg.push(data.imageName);
@@ -345,7 +354,10 @@
 								console.log(data.msg);
 							}else{
 								videoList.append('<li class="image"><a class="removeThumbnail">&times;</a><div class="uThumbnail" style="background-image: url(' +base_url+'uploads/video/'+ data.thumbnail +');"></div><input type="hidden" name="videoUrl" class="videoUrl" value="'+data.msg+'" /></li>');
-								$('#type').val("5");
+								
+								// Change option
+								$('#type').val("5").attr('selected', true).siblings('option').removeAttr('selected');
+								$('#type').selectmenu("refresh", true);
 								$('#my-progress').hide();
 								$('#uploadVideoBtn').hide();
 								
@@ -375,15 +387,17 @@
 			var uploadedImg = JSON.parse(localStorage.getItem('img'));
     		var uploadedImgLength = uploadedImg.length;
 			for(var i=0; i < uploadedImgLength; i++){
-				if(uploadedImg.imageName[i] == $(this).parent().find('.imgUrl').attr('value')){
-					uploadedImg.imageName.splice(i, 1);
+				if(uploadedImg[i] == $(this).parent().find('.imgUrl').attr('value')){
+					uploadedImg.splice(i, 1);
 					localStorage.setItem('img', JSON.stringify(uploadedImg));
 					
 				}	
 			}
 			
-    		if($('#imgList .removeThumbnail')){
-				$('#type').val("1");
+    		if($('#imgList .removeThumbnail').length <= 0){
+				// Change option
+				$('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
+				$('#type').selectmenu("refresh", true);
 				Create.updateMsg();
 			}
     	
@@ -396,15 +410,17 @@
 			var uploadedVideo = JSON.parse(localStorage.getItem('video'));
     		var uploadedVideoLength = uploadedVideo.length;
 			for(var i=0; i < uploadedVideoLength; i++){
-				if(uploadedVideo.videoName[i] == $(this).parent().find('.videoUrl').attr('value')){
-					uploadedVideo.videoName.splice(i, 1);
+				if(uploadedVideo[i] == $(this).parent().find('.imgUrl').attr('value')){
+					uploadedVideo.splice(i, 1);
 					localStorage.setItem('video', JSON.stringify(uploadedVideo));
 					
 				}	
 			}
 			
     		//$('#msgForm').submit();
-			$('#type').val("1");
+			// Change option
+			$('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
+			$('#type').selectmenu("refresh", true);
 			Create.updateMsg();
     		console.log("remove.");
     		$('#uploadVideoBtn').show();
@@ -454,17 +470,20 @@
 					dataType : "json"
 				}).done(function(data) {
 					var uploadedImg = JSON.parse(localStorage.getItem('img'));
+					
+					$( "#sketchModal" ).popup( "close" );
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
-					$('#type').val("3");
+					// Change option
+					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
+					$('#type').selectmenu("refresh", true);
 					canvasData = "";
 						//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
 							if(uploadedImg == null){
-								uploadedImg = {};
-								uploadedImg.imageName = [];
-								uploadedImg.imageName[0] = data.imageName;
+								uploadedImg = [];
+								uploadedImg.push(data.imageName);
 							}
 							else{ //append the newly uploaded image to the local storage
-								uploadedImg.imageName.push(data.imageName);
+								uploadedImg.push(data.imageName);
 							}
 							localStorage.setItem('img', JSON.stringify(uploadedImg));
 							Create.updateMsg();

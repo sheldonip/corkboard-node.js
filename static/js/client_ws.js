@@ -33,6 +33,7 @@
 				var messageId = $('#messageId').val();
 				console.log("msg: " + messageId);
 				Create.changePosition({newNotepaperId: newNotepaperId, oldNotepaperId: oldNotepaperId, messageId: messageId});
+				$( "#positionModal" ).popup( "close" );
 				return false;
 			});
 				
@@ -180,7 +181,9 @@
 				// Update UI
 				$('#linkPreview').css('padding','2%');
 				$('#linkPreview').css('border','1px solid #CCCCCC');
-				$('#type').val("4");
+				// Change option
+				$('#type').val("4").attr('selected', true).siblings('option').removeAttr('selected');
+				$('#type').selectmenu("refresh", true);
 				console.log("scrape");
 				Create.updateMsg();
 			}
@@ -220,7 +223,7 @@
 			if(data.notepapers && data.status == 'ok'){
 				data.notepapers = JSON.parse(data.notepapers);
 				$('div#positionModal div.note-thumb').addClass('occupied');
-				$('div#positionModal div.note-thumb').html('X');
+				$('div#positionModal div.note-thumb').html('<p>X</p>');
 				for(var i = 0; i < data.notepapers.length; i++){
 					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').removeClass('occupied');
 					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').html('');

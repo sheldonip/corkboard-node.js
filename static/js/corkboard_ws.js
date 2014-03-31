@@ -42,7 +42,7 @@
 				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
 												
 			} else if(type==3){
-				
+				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
 				notepaperInner.push('<div id="album-1" class="album">');
 				notepaperInner.push('<ul>');
 				
@@ -56,7 +56,7 @@
 				
 				notepaperInner.push('</ul>');
 			   notepaperInner.push('</div>');
-			   notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
+			   
 			   
 			} else if(type==4){
 				

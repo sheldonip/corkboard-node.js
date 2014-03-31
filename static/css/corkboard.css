@@ -1,7 +1,10 @@
+@font-face {
+    font-family: 'OpenSans-Regular'; 
+    src: url('OpenSans-Regular.ttf');
+}
+
 body{
-	background: url('../img/corkboard_m.jpg');
-	/*font-family: 'The Girl Next Door', cursive;*/
-    font-family: cursive;
+    font-family: OpenSans-Regular, cursive;
     line-height: 1.3em;
 }
 
@@ -22,6 +25,8 @@ p{
     color: #FFFFFF;
     text-shadow: 2px 2px 2px #000000;
 }
+
+button{ cursor: pointer; }
 
 div#wrapper{
     width: 96%;
@@ -56,6 +61,10 @@ div#main-wrapper a:hover{
 	position: absolute;
 }
 
+.note-thumb-container{
+	margin-bottom: 10px;
+}
+
 .note-thumb{
 	-transition: all .2s ease-in-out;
 	-moz-transition: all .2s ease-in-out;
@@ -68,18 +77,21 @@ div#main-wrapper a:hover{
 	float: left;
 	margin: 6px 1%;
 	border: 1px solid rgba(0,0,0,.25);
-	cursor: default;
-	width: 23%;
+	cursor: pointer;
+	width: 21%;
     height: 80px;	
 }
 
 .note-thumb.occupied{
 	opacity: 0.3;
-	padding: 28px 0;
 	font-weight: bold;
 	font-size: 40px;
 }
 
+.note-thumb.occupied p{
+	color: #000000;
+	margin-top: 10%;
+}
 
 /********/
 /* Form */
@@ -121,6 +133,10 @@ form input[type="file"]{
     font-size: 20px;
     text-shadow: 2px 2px 2px #333333;
 }
+
+form.galleryForm > div,
+form.videoForm > div{ border: 0; }
+
 form input[type="file"],
 div.imgholder{ margin-bottom: 2%; text-align: center;}
 
@@ -130,6 +146,10 @@ div.imgholder{
 div.imgholder img{
     width: 100%;
     max-width: 538px;
+}
+
+div.imgholder>button{
+	display: inline-block;
 }
 
 form #imgList li,
@@ -182,6 +202,8 @@ form div.content-container #imgList > li > button{
 button.removeYoutube{ 
 	float: right; 
 	font-size: 2em;
+	border: 0;
+	background-color: transparent;	
 }
 .navbar-nav > li > a{
     text-align: center;
@@ -210,11 +232,79 @@ button.removeYoutube{
 	cursor: pointer;
 }
 
-div.imgholder button.btn-lg{
-	width: 33%;
+a.btn{
+	color: #333333;	
+	text-decoration: none;
+	border-radius: 5px;
+	text-align: center;
 }
+
+.btn-lg{
+	width: 20%;
+	padding: 10px 5%;
+	border: 1px solid #DDDDDD;
+	margin: 1%;
+	float: left;
+	cursor: pointer;
+}
+
+.btn-lg:hover{
+	background-color: #ededed;
+	color: #333333;
+}
+
 div.imgholder button#btn-youtube{
 	display: none;
+}
+
+#positionBtn{ width: 50%;}
+
+div.modal button{
+	width: 30%;
+	display: inline-block;
+}
+
+div.tools{
+	padding: 5px;
+}
+
+#uploadImgBtn{ background-color: #8ABE9B; }
+#uploadVideoBtn{ background-color: #F2E07B; }
+#sketchBtn{ background-color: #F48D6C; }
+
+#uploadImgBtn:hover,
+#uploadVideoBtn:hover,
+#sketchBtn:hover{
+	background-color: #ededed;
+}
+
+/**************************/
+/* Override JQuery mobile */
+/**************************/
+.ui-page-theme-a{
+	background-image: url('../img/corkboard_m.jpg');
+}
+.ui-page-theme-a .ui-bar-inherit{ background-color: #4A6D8B; }
+
+input, select, textarea, button, .ui-btn{ font-family: inherit; }
+
+div#positionModal-popup{ width: 90%; }
+
+.ui-header .ui-title, .ui-footer .ui-title{ 
+	font-size: 1.4em; 
+	font-family: OpenSans-Regular, cursive;
+}
+
+.ui-page-theme-a .ui-btn,
+a.btn{ 
+	background-color: #F0D4AF; 
+	border-color: #666666; 
+	text-shadow: 0 0;
+}
+
+.ui-popup .ui-header .ui-title{ 
+	width: 80%;
+	margin-left: 10%;
 }
 
 /**********/
@@ -227,7 +317,7 @@ div.imgholder button#btn-youtube{
 }
 
 @media only screen and (min-width : 1024px){
-    body{ background: url('../img/corkboard.jpg'); }
+    
 }
 
 /* For modern browsers */
