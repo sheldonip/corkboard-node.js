@@ -26,14 +26,21 @@
 				return false;
     		});
 			
-			//when the user choose a particular position
-			$('.note-thumb').click(function(){
+			//when the user choose a particular position in #positionModal
+			$('#positionModal .note-thumb').click(function(){
 				var newNotepaperId = $(this).attr('position');
 				var oldNotepaperId = $('#notepaperId').val();
 				var messageId = $('#messageId').val();
 				console.log("msg: " + messageId);
 				Create.changePosition({newNotepaperId: newNotepaperId, oldNotepaperId: oldNotepaperId, messageId: messageId});
 				$( "#positionModal" ).popup( "close" );
+				return false;
+			});
+			
+			//when the user choose a particular position in #fetchModal
+			$('#fetchModal .note-thumb').click(function(){
+				console.log("#fetchModal .note-thumb");
+				
 				return false;
 			});
 				

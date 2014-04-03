@@ -6,6 +6,7 @@
 body{
     font-family: OpenSans-Regular, cursive;
     line-height: 1.3em;
+	padding: 0;
 }
 
 h1{
@@ -53,6 +54,17 @@ div#main-wrapper a:hover{
 
 #my-progress{
 	display: none;
+	width: 100%;
+	height: 30px;
+	border: 1px solid #666666;
+	border-radius: 5px;
+	background-color: #FFFFFF;
+}
+
+#my-progress>div.progress-bar{
+	width: 0; /* Adjust by script */
+	height: 30px;
+	background-color: #4A6D8B;
 }
 
 #choose-wrapper{
@@ -61,7 +73,9 @@ div#main-wrapper a:hover{
 	position: absolute;
 }
 
-.note-thumb-container{
+.note-thumb-container,
+.color-thumb-container{
+	margin-left: 10px;
 	margin-bottom: 10px;
 }
 
@@ -91,6 +105,19 @@ div#main-wrapper a:hover{
 .note-thumb.occupied p{
 	color: #000000;
 	margin-top: 10%;
+}
+
+.color-thumb-container{
+	text-align: center;
+}
+
+.color-thumb{
+	border: 1px solid black;
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	background-color: #FFFFFF;
+	cursor: pointer;
 }
 
 /********/
@@ -278,17 +305,29 @@ div.tools{
 	background-color: #ededed;
 }
 
+#footer ul li{
+	position: relative;
+}
+
+#footer ul li a{
+	width: 100%;
+	padding: 10px 0;
+	border-radius: 0px;
+}
+
 /**************************/
 /* Override JQuery mobile */
 /**************************/
 .ui-page-theme-a{
 	background-image: url('../img/corkboard_m.jpg');
 }
-.ui-page-theme-a .ui-bar-inherit{ background-color: #4A6D8B; }
+.ui-page-theme-a .ui-bar-inherit,
+.ui-popup>.ui-header{ background-color: #4A6D8B; }
 
 input, select, textarea, button, .ui-btn{ font-family: inherit; }
 
-div#positionModal-popup{ width: 90%; }
+div#positionModal-popup,
+div#fetchModal-popup{ width: 90%; }
 
 .ui-header .ui-title, .ui-footer .ui-title{ 
 	font-size: 1.4em; 

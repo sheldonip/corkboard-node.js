@@ -52,9 +52,6 @@
 				<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>"> -->
 			</form>
 			
-			<div class="progress" id="my-progress">
-                <div class="progress-bar" role="progressbar" style="width: 0%;"></div>
-            </div>
 		</div>
 		
 		<form id="msgForm" action="/index.php/message/update" role="form" method="post" accept-charset="utf-8">
@@ -87,15 +84,17 @@
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
 		</form>
 		
+		<div class="progress" id="my-progress">
+            <div class="progress-bar" role="progressbar" style="width: 0%;"></div>
+        </div>
+		
 		<!--
 		<button type="button" id="saveBtn" class="btn btn-default btn-lg">
 			Save
 		</button>
 		-->
 		
-		<a id="positionBtn" class="btn btn-default btn-lg" href="#positionModal" data-rel="popup" data-position-to="window" data-transition="pop">
-			Change Notepaper
-		</a>
+		
 		
         </div>
         
@@ -137,7 +136,38 @@
 		<div class="modal fade" id="positionModal" data-role="popup">
 			<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
 			<div data-role="header" data-theme="a">
-				<h1>Choose position</h1>
+				<h1>Notepaper Position</h1>
+			</div>
+			<div role="main" class="ui-content" id="canvas-holder">
+				<div class="note-thumb-container cf">
+					<div class="note-thumb" position="1"></div>
+					<div class="note-thumb" position="2"></div>
+					<div class="note-thumb" position="3"></div>
+					<div class="note-thumb" position="4"></div>
+					<div class="note-thumb" position="5"></div>
+					<div class="note-thumb" position="6"></div>
+					<div class="note-thumb" position="7"></div>
+					<div class="note-thumb" position="8"></div>
+				</div>
+			</div>	
+			<div data-role="header" data-theme="a">
+				<h1>Notepaper Color</h1>
+			</div>
+			<div role="main" class="ui-content" id="colors-holder">
+				<div class="color-thumb-container cf">
+					<div class="color-thumb" value="#FFFFFF"></div>
+					<div class="color-thumb" value="#FFF780"></div>
+					<div class="color-thumb" value="#D5E4F5"></div>
+					<div class="color-thumb" value="#CBFAFA"></div>
+					<div class="color-thumb" value="#F8CDCD"></div>
+				</div>
+			</div>
+		</div>
+		
+		<div class="modal fade" id="fetchModal" data-role="popup">
+			<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
+			<div data-role="header" data-theme="a">
+				<h1>Which notepaper?</h1>
 			</div>
 			<div role="main" class="ui-content" id="canvas-holder">
 				<div class="note-thumb-container cf">
@@ -155,6 +185,34 @@
         
 		<a href='#sketchpad' data-clear='true' id="real-clear-canvas">Clear</a>
 		</div><!-- /content -->
+		
+		<div id="footer" data-role="footer" style="overflow:hidden;" data-position="fixed">
+			<div data-role="navbar">
+				<ul>
+					<li>
+						<a id="postBtn" class="btn btn-primary btn-lg">
+						Post
+						</a>			
+					</li>
+					<!--<li>
+						<a id="sketchBtn" class="btn btn-info btn-lg" href="#sketchModal" data-rel="popup" data-position-to="window" data-transition="pop">
+							Sketch
+							<span class="glyphicon glyphicon-picture"></span>
+						</a>
+					</li>-->
+					<li>
+						<a id="fetchBtn" class="btn btn-primary btn-lg" href="#fetchModal" data-rel="popup" data-position-to="window" data-transition="pop">
+						Fetch
+						</a>
+					</li>
+					<li>
+						<a id="positionBtn" class="btn btn-default btn-lg" href="#positionModal" data-rel="popup" data-position-to="window" data-transition="pop">
+							Setting
+						</a>
+					</li>					
+				</ul>
+			</div><!-- /navbar -->
+		</div><!-- /footer -->
 		
 		</div><!-- /page -->
 		
@@ -224,7 +282,10 @@
 				$('#type').selectmenu("refresh", true);
 			}
 			
-			
+			//Prepare colors for setting
+			$('div.color-thumb').each(function(){
+				$(this).css('background-color',$(this).attr('value'));
+			});
 		});
 			//customize upload button
 			$('#uploadImgBtn').click(function(){

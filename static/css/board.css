@@ -137,12 +137,10 @@ div.frame{
 .note-white {
 	background-color: white;
 }
-.note-green {
-    background-color: #CBFAFA;
-}
-.note-red {
-    background-color: #F8CDCD;
-}
+.note-CBFAFA { background-color: #CBFAFA; }
+.note-F8CDCD { background-color: #F8CDCD; }
+.note-D5E4F5 { background-color: #D5E4F5; }
+.note-FFF780 { background-color: #FFF780; }
 
 .note-2deg {
     transform: rotate(-2deg);
