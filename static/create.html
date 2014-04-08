@@ -561,6 +561,14 @@
 		//sketch.clear();
 	});
 	
+	// Update notepaper color
+	$('#colors-holder div.color-thumb-container div.color-thumb').on("click", function(e) {
+		e.preventDefault();
+		$('#colors-holder div.color-thumb-container div.color-thumb').removeClass('active');
+		$(this).addClass('active');
+		Create.updateMsg();
+	});
+	
 	// Get parameter by name in a url string
 	function getParameterByName(name, string){
 	  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");

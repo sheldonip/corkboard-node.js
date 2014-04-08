@@ -91,7 +91,9 @@
 				//notepaperInner.push('<img class="notepaper-qrCode" src="'+ base_url +'img/qrcode/' + qrUrls[notepaper.id] + '">');
 			}
 			
-			$('#note-'+id).find('.content-container').html(notepaperInner.join(''));			
+			$('#note-'+id).find('.content-container').html(notepaperInner.join(''));	
+			if(!notepaper.bgcolor){ notepaper.bgcolor = '#FFF'; }
+			$('#note-'+id).css('background-color',notepaper.bgcolor);				
 			
 			notepaperInner = [];
 			}
@@ -99,6 +101,7 @@
 		
 		clear : function(notepaper){
 			$('#note-'+notepaper.notepaperId).find('.content-container').html("");
+			$('#note-'+notepaper.notepaperId).css('background-color','#FFF');
 			
 		}
 		

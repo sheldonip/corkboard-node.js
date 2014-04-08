@@ -79,6 +79,7 @@
 			message.id = parseInt($('#notepaperId').val());
 			message.type = parseInt($('#type').val());
 			message.content = $('#textContent').val();
+			message.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
 			//console.log('update '+content);
 			
 			var url = $('#url').val();

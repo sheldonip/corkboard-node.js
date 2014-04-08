@@ -120,6 +120,11 @@ div#main-wrapper a:hover{
 	cursor: pointer;
 }
 
+.color-thumb-container > .active{
+	opacity: 0.3;
+	margin-right: 1px;
+}
+
 /********/
 /* Form */
 /********/
@@ -315,6 +320,20 @@ div.tools{
 	border-radius: 0px;
 }
 
+/* For modern browsers */
+.cf:before,
+.cf:after {
+    content:"";
+    display:table;
+}
+.cf:after {
+    clear:both;
+}
+/* For IE 6/7 (trigger hasLayout) */
+.cf {
+    zoom:1;
+}
+
 /**************************/
 /* Override JQuery mobile */
 /**************************/
@@ -346,6 +365,10 @@ a.btn{
 	margin-left: 10%;
 }
 
+.ui-header .ui-title{
+	margin: 0 15%;
+}
+
 /**********/
 /* Others */
 /**********/
@@ -359,16 +382,3 @@ a.btn{
     
 }
 
-/* For modern browsers */
-.cf:before,
-.cf:after {
-    content:"";
-    display:table;
-}
-.cf:after {
-    clear:both;
-}
-/* For IE 6/7 (trigger hasLayout) */
-.cf {
-    zoom:1;
-}
