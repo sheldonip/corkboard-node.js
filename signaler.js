@@ -339,7 +339,7 @@ app.post('/upload/uploadgallery', function (req, res) {
 
 app.post('/upload/uploadsketch', function (req, res) {
 	var objToJson = {};
-	var imageName = Math.round(new Date().getTime() / 1000) + "-" + Math.floor(Math.random() * 2147483) + '.png'; //generate the filename for the image
+	var imageName = Math.round(new Date().getTime() / 1000) + "-" + Math.floor(Math.random() * 2147483); //generate the filename for the image
 	var newPath = __dirname + "\\static\\uploads\\original\\" + imageName;
 	var thumbPath = __dirname + "\\static\\uploads\\thumbnail\\" + imageName;
 	var resizedPath = __dirname + "\\static\\uploads\\resized\\" + imageName;

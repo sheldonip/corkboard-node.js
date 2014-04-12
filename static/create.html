@@ -70,10 +70,10 @@
   					<option value="3">Photos</option>
   					<option value="5">Video</option>
   					<option value="6">Sketch</option>
-  					<option value="4">Youtube</option>
+  					<option value="4">Url</option>
 				</select>
             </div>
-			<input type="hidden" name="id" id="" value="<?php echo (int)$messageId; ?>" />
+			<input type="hidden" name="id" id="" value="" />
 			<input type="hidden" name="videoId" id="videoId" value="" />
 			<input type="hidden" name="url" id="url" />
 			<input type="hidden" name="urlTitle" id="urlTitle" />
@@ -274,12 +274,16 @@
 					$('#type').selectmenu("refresh", true);
 				}
 			}
-			if(text!=null){
-				$('#textContent').val(text);
+			if(text!=null){ //Fetch text from local storage
+				$('#textContent').val(text); 
 			}
-			if(type!=null){
+			if(type!=null){ //Fetch type from local storage
 				$('#type').val(type).attr('selected', true).siblings('option').removeAttr('selected');
 				$('#type').selectmenu("refresh", true);
+			}
+			
+			if(notepaperId){
+				$('div.note-thumb[position=\'' + notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
 			}
 			
 			//Prepare colors for setting
@@ -507,7 +511,7 @@
    	
 	//sketchpad
 	$(function() {
-    	$.each(['#f00', '#ff0', '#0f0', '#0ff', '#00f', '#f0f', '#000', '#fff'], function() {
+    	$.each(['#f00', '#ff0', '#0f0', '#00f', '#f0f', '#000', '#fff'], function() {
     		$('#canvas-holder .tools').append("<a href='#sketchpad' data-color='" + this + "' style='width: 30px; background: " + this + ";'></a> ");
     	});
     	$('#sketchpad').sketch();
@@ -581,13 +585,14 @@
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	}
 	
+	/*
 	$("#positionBtn").on("click", function(){
 		// Check unoccupied notepapers and show results
 		//console.log('[DEBUG] queryPositions()');
-		 Create.queryPositions();
+		Create.queryPositions();
 	});
-
-
+	*/
+	
 	</script>
 
 	</body>

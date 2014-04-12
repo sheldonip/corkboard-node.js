@@ -103,8 +103,15 @@ div#main-wrapper a:hover{
 }
 
 .note-thumb.occupied p{
+	border: 1px solid rgba(0,0,0,.25);
 	color: #000000;
 	margin-top: 10%;
+}
+
+.note-thumb.owned{
+	width: 19%;
+	height: 76px;
+	border: 3px ridge #FF0000;
 }
 
 .color-thumb-container{

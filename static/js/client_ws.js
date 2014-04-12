@@ -28,12 +28,15 @@
 			
 			//when the user choose a particular position in #positionModal
 			$('#positionModal .note-thumb').click(function(){
+				if( $(this).attr('class') != "note-thumb" ){
+					alert('The notepaper is already occupied.');
+					return false;
+				}
 				var newNotepaperId = $(this).attr('position');
 				var oldNotepaperId = $('#notepaperId').val();
 				var messageId = $('#messageId').val();
 				console.log("msg: " + messageId);
 				Create.changePosition({newNotepaperId: newNotepaperId, oldNotepaperId: oldNotepaperId, messageId: messageId});
-				$( "#positionModal" ).popup( "close" );
 				return false;
 			});
 			
@@ -204,6 +207,7 @@
 		occupyNotepaperResult: function(notepaper) {
 			$('#notepaperId').val(notepaper.notepaperId);
 			localStorage.setItem('notepaperId', notepaper.notepaperId);
+			$('div.note-thumb[position=\'' + notepaper.notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
 			$('#messageId').val(notepaper.messageId);
 			localStorage.setItem('messageId', notepaper.messageId);
 		},
@@ -213,10 +217,14 @@
 		},
 		
 		changePositionSuccess: function(notepaper) {
+			var oldNotepaperId = $('#notepaperId').val();
 			$('#notepaperId').val(notepaper.newNotepaperId);
 			localStorage.setItem('notepaperId', notepaper.newNotepaperId);
+			$( "#positionModal" ).popup( "close" );
+			$('div.note-thumb[position=\'' + oldNotepaperId + '\']').removeClass('owned');
+			$('div.note-thumb[position=\'' + notepaper.newNotepaperId + '\']').addClass('owned'); //indicate the current notepaper
 			Create.updateMsg();
-			$('#positionModal').modal('hide')
+			//$('#positionModal').modal('hide')
 		},
 		
 		changePositionFail: function(notepaper) {
@@ -227,8 +235,10 @@
 			this.socket.emit('queryPositions', {});
 		},
 		
+		/*
 		queryPositionsHandler: function(data){			
 			if(data.notepapers && data.status == 'ok'){
+				var notepaperId = $('#notepaperId').val();
 				data.notepapers = JSON.parse(data.notepapers);
 				$('div#positionModal div.note-thumb').addClass('occupied');
 				$('div#positionModal div.note-thumb').html('<p>X</p>');
@@ -236,9 +246,12 @@
 					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').removeClass('occupied');
 					$('div.note-thumb[position=\'' + data.notepapers[i].id + '\']').html('');
 				}
+				$('div.note-thumb[position=\'' + notepaperId + '\']').addClass('owned'); //indicate the current notepaper
+				
 			} else {
 				console.log('[ERROR] Cannot query position of notepapers.');
 			}
 		}
+		*/
 	};
 }());
