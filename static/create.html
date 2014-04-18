@@ -246,6 +246,7 @@
 			var text = localStorage.getItem('text');
 			var type = localStorage.getItem('type');
 			var notepaperId = localStorage.getItem('notepaperId');
+			var bgcolor = JSON.parse(localStorage.getItem('bg-color'));
 			
 			//Fetch all the uploaded image thumbnails
 			var imgList = $('#imgList');
@@ -289,6 +290,9 @@
 			//Prepare colors for setting
 			$('div.color-thumb').each(function(){
 				$(this).css('background-color',$(this).attr('value'));
+				if($(this).attr('value') == bgcolor[0]){
+					$(this).addClass('active');
+				}
 			});
 		});
 			//customize upload button
@@ -570,6 +574,12 @@
 		e.preventDefault();
 		$('#colors-holder div.color-thumb-container div.color-thumb').removeClass('active');
 		$(this).addClass('active');
+		
+		// Store notepaper color in localstorage		
+		bgcolorStorage = [];
+		bgcolorStorage.push($('#colors-holder > .color-thumb-container > .active').attr('value'));
+		localStorage.setItem('bg-color', JSON.stringify(bgcolorStorage));
+		
 		Create.updateMsg();
 	});
 	
@@ -585,14 +595,21 @@
 		return decodeURIComponent(results[1].replace(/\+/g, " "));
 	}
 	
-	/*
+	
 	$("#positionBtn").on("click", function(){
 		// Check unoccupied notepapers and show results
 		//console.log('[DEBUG] queryPositions()');
 		Create.queryPositions();
 	});
-	*/
 	
+	
+	$("#postBtn").on("click", function(e){		
+		e.preventDefault();
+		Create.updateMsg();
+		setTimeout(function(){
+			$('a.ui-btn-active').removeClass('ui-btn-active');
+		},200);
+	});
 	</script>
 
 	</body>
