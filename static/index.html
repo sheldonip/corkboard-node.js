@@ -17,29 +17,21 @@
 			<div class="note-grid">
 			<a id="note-1" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-2" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-3" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-4" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a> 
 			</div>
 			</div>
@@ -47,29 +39,21 @@
 			<div class="note-grid">
 			<a id="note-5" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-6" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-7" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
 			<div class="note-grid">
 			<a id="note-8" class="note note-white">
 				<div class="pin"></div>
-				<div class="content-container">
-				</div>
 			</a>
 			</div>
             </div>
@@ -135,7 +119,25 @@
 						}
 					);
                 }, 3000);
-				
+
+                // Time-sharing messages animation
+                setInterval(function() {
+					$('.note').each(function(){
+							var firstMsg = $(this).children('div.content-container').first().detach(); // Remove the first element
+							$(this).append(firstMsg); // Add it back to the end	
+
+							var bgcolor = $(this).children('div.content-container').first().attr('bgcolor');
+							if(!bgcolor){ bgcolor = '#FFFFFF'; }
+
+												
+							$(this).children('div.content-container:nth-child(2)').animate({opacity: 1.0}, 800);
+							$(this).css('background-color', bgcolor);
+							$(this).children('div.content-container:not(:nth-child(2))').css('opacity', 0.0);
+						}
+					);
+                }, 3000);
+
+				// QR code
 				var QRHeight = $('#note-9').height();
 				
 				new QRCode(document.getElementById("qrcode"), {

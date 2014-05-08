@@ -200,6 +200,10 @@ div.banner-container{
     text-align: center;
 }
 
+div.content-container:not(:nth-child(2)){
+    opacity: 0;
+}
+
 div.content-container > .qr{
     padding: 0 5%;
     position: relative;

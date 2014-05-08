@@ -35,6 +35,7 @@
 				var newNotepaperId = $(this).attr('position');
 				var oldNotepaperId = $('#notepaperId').val();
 				var messageId = $('#messageId').val();
+
 				console.log("msg: " + messageId);
 				Create.changePosition({newNotepaperId: newNotepaperId, oldNotepaperId: oldNotepaperId, messageId: messageId});
 				return false;
@@ -66,7 +67,7 @@
 			//Check whether the user has been occupied a notepaper before
 			var notepaperId = localStorage.getItem('notepaperId');
 			var messageId = localStorage.getItem('messageId');
-			
+
 			if(notepaperId==null || messageId==null){ //fetch a empty notepaper from server
 				this.occupyNotepaper();
 			}
@@ -74,6 +75,8 @@
 				$('#notepaperId').val(notepaperId);
 				$('#messageId').val(messageId);
 			}
+			
+			
 		},
 		
 		// Sends a message to the server
@@ -83,6 +86,7 @@
 			message.type = parseInt($('#type').val());
 			message.content = $('#textContent').val();
 			message.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
+			message.msgId = parseInt(localStorage.getItem('messageId'));
 			//console.log('update '+content);
 			
 			var url = $('#url').val();
@@ -157,8 +161,8 @@
 			}
 			//send save message
 			this.socket.emit('saveMsg', {
-				id: id,
-				type: type,
+				id: message.id,
+				type: message.type,
 				content: JSON.stringify(message)
 			});
 			
@@ -200,8 +204,8 @@
 			}
 		},
 		
-		occupyNotepaper: function() {
-			this.socket.emit('occupyNotepaper', {});
+		occupyNotepaper: function(data) {
+			this.socket.emit('occupyNotepaper', data);
 		},
 		
 		occupyNotepaperResult: function(notepaper) {
@@ -254,4 +258,5 @@
 		}
 		*/
 	};
+
 }());

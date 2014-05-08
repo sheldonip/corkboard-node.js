@@ -290,11 +290,13 @@
 			//Prepare colors for setting
 			$('div.color-thumb').each(function(){
 				$(this).css('background-color',$(this).attr('value'));
-				if($(this).attr('value') == bgcolor[0]){
+				if(bgcolor && $(this).attr('value') == bgcolor[0]){
 					$(this).addClass('active');
 				}
 			});
 		});
+
+
 			//customize upload button
 			$('#uploadImgBtn').click(function(){
         		// Simulate a click on the file input button

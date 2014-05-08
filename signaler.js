@@ -139,23 +139,18 @@ io.sockets.on('connection', function (socket) {
 		console.log('[DEBUG] emptyMessages');
 		var msgId, notepaperId;
 		connection.query('SELECT * FROM notepaper WHERE occupied = 0 limit 1', function(err, rows) {
-			// return JSON response
-				if(rows.length>0){
-				
-					notepaperId = rows[0].id;
-				
+				if(rows.length>0){				
+					notepaperId = rows[0].id;				
 				} else {
 					//if full, random a notepaper
 					notepaperId = Math.floor(Math.random()*8) + 1;
-					
 				}
-				console.log('[DEBUG] notepaperId' + notepaperId);
+				
 				var message  = {type: 1};
 				connection.query('INSERT INTO message SET ?', message, function(err, result) {
 					msgId = result.insertId;
-					console.log('[DEBUG] messageId' + msgId);
-					
-					connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [msgId, notepaperId], function(err2, result2) {
+
+					connection.query('UPDATE message SET notepaper_id = ? WHERE id = ?', [notepaperId, msgId], function(err2, result2) {
 						socket.emit('occupyNotepaperResult', {notepaperId: notepaperId, messageId: msgId});
 					});
 		
@@ -165,27 +160,22 @@ io.sockets.on('connection', function (socket) {
 	
 	socket.on('changePosition', function (data) {
 		console.log('[DEBUG] changeposition '+data.newNotepaperId);
-		
-		//check whether the notepaper is empty
-		connection.query('SELECT * FROM notepaper WHERE occupied = 0 AND id = ?', [parseInt(data.newNotepaperId)], function(err, rows) {
-			if(rows.length > 0){
-				//occupy another notepaper
-				var query = connection.query('UPDATE notepaper SET occupied = 1, message_id = ? WHERE id = ?', [parseInt(data.messageId), parseInt(data.newNotepaperId)], function(err2, result2) {
-					console.log(query.sql);
-				});
-		
-				//release the original notepaper
-				connection.query('UPDATE notepaper SET occupied = 0, message_id = NULL WHERE id = ?', [parseInt(data.oldNotepaperId)], function(err2, result2) {
-			
-				});
-		
-			//signal the corkboard to clear the original notepaper
-				io.sockets.emit('clearMsg', { notepaperId : parseInt(data.oldNotepaperId) });
+
+		// Occcupy another notepaper and release the original notepaper		
+		var query = connection.query('UPDATE message SET notepaper_id = ? WHERE id = ?', [parseInt(data.newNotepaperId), parseInt(data.messageId)], function(err2, result2) {
+				console.log('query: ' + query.sql);
+				if(err2){
+					socket.emit('changePositionFail', data);
+				}
+
+				//signal the corkboard to clear the original notepaper
+				io.sockets.emit('clearMsg', { notepaperId : parseInt(data.oldNotepaperId), msgId : parseInt(data.messageId) });
 				socket.emit('changePositionSuccess', data);
-			} else {
-				socket.emit('changePositionFail', {});
-			}
-		});
+
+		});		
+			
+			
+		
 		
 	});
 	
@@ -224,9 +214,9 @@ app.get('/message/create', function (req, res) {
     res.sendfile(__dirname + '/static/create.html');
 });
 
-app.get('/message/choosepos', function (req, res) {
+/*app.get('/message/choosepos', function (req, res) {
     res.sendfile(__dirname + '/static/choosePos.html');
-});
+});*/
 
 /*app.get('/process/updateNotepapers', function (req, res) {
     var objToJson = {};	

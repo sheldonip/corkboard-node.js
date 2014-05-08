@@ -21,22 +21,40 @@
 		// Adds a new message
 		add : function(data) {
 			
-			var id, type, notepaperInner = [];
+			var id, type, msgId, bgcolor, notepaperInner = [];
 			
 			for(var i=0 ; notepaper = data[i] ; i++){
 			
 			id = parseInt(notepaper.id);
 			type = parseInt(notepaper.type);
-			
-			console.log('[DEBUG] id: ' + id + '; type:' + type);
+			bgcolor = String(notepaper.bgcolor);
+			msgId = parseInt(notepaper.msgId);
+
 			// Check id
 			if(id > maxId && id <= 0){
+				return false;
+			}
+
+			// Check background color
+			if(!bgcolor || bgcolor == 'null' || bgcolor == 'undefined'){
+				bgcolor = '#FFFFFF';
+			}
+
+			// Check message Id
+			console.log('[DEBUG] ' + 'msgId: ' + msgId);
+			if(!msgId || isNaN(msgId)){
 				return false;
 			}
 			
 			// Bug: cannot replace \\n by \<br>
 			//content.content = content.content.replace('\n','<br>');'
 			
+			// Prepare container
+			if($('#note-'+id+' div#msg-'+msgId).length <= 0){
+				$('#note-'+id+' div#msg-'+msgId).remove();
+				$('#note-'+id).append('<div class="content-container" id="msg-' + msgId + '" bgcolor="' + bgcolor + '"></div>');
+			}
+
 			if(type==1){
 
 				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
@@ -91,16 +109,17 @@
 				//notepaperInner.push('<img class="notepaper-qrCode" src="'+ base_url +'img/qrcode/' + qrUrls[notepaper.id] + '">');
 			}
 			
-			$('#note-'+id).find('.content-container').html(notepaperInner.join(''));	
+			$('#note-'+id).find('#msg-'+msgId).html(notepaperInner.join(''));
 			if(!notepaper.bgcolor){ notepaper.bgcolor = '#FFF'; }
 			$('#note-'+id).css('background-color',notepaper.bgcolor);				
 			
 			notepaperInner = [];
-			}
+			}	// End of for-loop
 		},
 		
 		clear : function(notepaper){
-			$('#note-'+notepaper.notepaperId).find('.content-container').html("");
+			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).html("");
+			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).remove();
 			$('#note-'+notepaper.notepaperId).css('background-color','#FFF');
 			
 		}
