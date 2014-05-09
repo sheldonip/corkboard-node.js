@@ -17,10 +17,12 @@
 		<![endif]-->
 	</head>
 	<body>
-		<div data-role="page">
+		<div data-role="page" id="post">
 	
 		<div data-role="header">
+			<a href="#menu" id="menuBtn" class="ui-btn-left ui-btn-corner-all ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow" title=" menu " data-form="ui-icon" data-role="button" role="button"> menu </a>
 			<h1>Post Message</h1>
+			<a class="ui-btn-right ui-btn-corner-all ui-btn ui-icon-plus ui-btn-icon-notext ui-shadow addNewMsgBtn" title=" add " data-form="ui-icon" data-role="button" role="button"> add </a>
 		</div>
 		
 		<div role="main" class="ui-content">
@@ -155,7 +157,7 @@
 			</div>
 			<div role="main" class="ui-content" id="colors-holder">
 				<div class="color-thumb-container cf">
-					<div class="color-thumb" value="#FFFFFF"></div>
+					<div class="color-thumb active" value="#FFFFFF"></div>
 					<div class="color-thumb" value="#FFF780"></div>
 					<div class="color-thumb" value="#D5E4F5"></div>
 					<div class="color-thumb" value="#CBFAFA"></div>
@@ -216,6 +218,24 @@
 		
 		</div><!-- /page -->
 		
+		<!--menu page -->
+		<div data-role="page" id="menu">
+	
+		<div data-role="header">
+			<h1>Post Message</h1>
+			<a href="#post" class="ui-btn-right ui-btn-corner-all ui-btn ui-icon-plus ui-btn-icon-notext ui-shadow addNewMsgBtn" title=" add " data-form="ui-icon" data-role="button" role="button"> add </a>
+		</div>
+		
+		<div role="main" class="ui-content">
+			<ul id="messageList" data-role="listview">
+				
+			</ul>
+		</div>
+		
+		</div>
+		
+		
+		
 		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 		<script src="/js/jquery-1.10.2.js"></script>
 		<!-- For upload form of photo gallery -->
@@ -230,73 +250,51 @@
 		<!-- Custom js -->
 		<script src="/js/sketch.js"></script>	
 		<script src="/js/baseurl.js"></script>
-		<script src="/js/client_ws.js"></script>
-
+		
 		<script>
 		
+		//initialize global variables
+		var allMessage;
+		var message;
+		
+		
 		$( document ).ready(function() {
-			Create.initialize(base_url);
+			
 			// Initialise forms
 			$('form#galleryForm-1').attr('action', base_url+'upload/uploadGallery');
 			$('form.videoForm').attr('action', base_url+'upload/uploadVideo');
 			
-			//Fetch all the data from the local storage
-			var uploadedImg = JSON.parse(localStorage.getItem('img'));
-			var uploadedVideo = JSON.parse(localStorage.getItem('video'));
-			var text = localStorage.getItem('text');
-			var type = localStorage.getItem('type');
-			var notepaperId = localStorage.getItem('notepaperId');
-			var bgcolor = JSON.parse(localStorage.getItem('bg-color'));
+			//initialze the message object
 			
-			//Fetch all the uploaded image thumbnails
-			var imgList = $('#imgList');
-			if(uploadedImg != null){
-				var uploadedImgLength = uploadedImg.length;
-				for(var i=0; i < uploadedImgLength; i++){
-					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ uploadedImg[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedImg[i]+'" /></li>');
-				}
-				if(uploadedImgLength > 0){
-					// Change option
-					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
-					$('#type').selectmenu("refresh", true);
-				}
-			}
-			//Fetch all the uploaded video thumbnails
-			var videoList = $('#videoList');
-			if(uploadedVideo != null){
-				var uploadedVideoLength = uploadedVideo.length;
-				for(var i=0; i < uploadedVideoLength; i++){
-					videoList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/video/'+ uploadedVideo[i].replace('.mp4','.jpg') +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+uploadedVideo[i]+'" /></li>');
-				}
-				if(uploadedVideoLength > 0){
-					$('#uploadVideoBtn').hide();
-					// Change option
-					$('#type').val("5").attr('selected', true).siblings('option').removeAttr('selected');
-					$('#type').selectmenu("refresh", true);
-				}
-			}
-			if(text!=null){ //Fetch text from local storage
-				$('#textContent').val(text); 
-			}
-			if(type!=null){ //Fetch type from local storage
-				$('#type').val(type).attr('selected', true).siblings('option').removeAttr('selected');
-				$('#type').selectmenu("refresh", true);
+			allMessage = JSON.parse(localStorage.getItem('allMessage'));
+			if(allMessage == null){
+				allMessage = [];
 			}
 			
-			if(notepaperId){
-				$('div.note-thumb[position=\'' + notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
-			}
+			message = {};
+			message.bgcolor = "#FFFFFF"; //initialize the bgcolor to white
+			allMessage[allMessage.length] = message;
+						
+			Create.initialize(base_url);
 			
+			//message.img = message.img;
+			//message.video = message.video;
+			//text = message.text;
+			//type = message.type;
+			//notepaperId = message.notepaperId;
+			//url = message.url;
+			
+			
+			/*
+			if(message.notepaperId){
+				$('div.note-thumb[position=\'' + message.notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
+			}
+			*/
 			//Prepare colors for setting
 			$('div.color-thumb').each(function(){
 				$(this).css('background-color',$(this).attr('value'));
-				if(bgcolor && $(this).attr('value') == bgcolor[0]){
-					$(this).addClass('active');
-				}
 			});
 		});
-
-
 			//customize upload button
 			$('#uploadImgBtn').click(function(){
         		// Simulate a click on the file input button
@@ -369,7 +367,7 @@
                      	galleryForm.clearForm();
                      	progressBar.width('0%');
                      	var data = JSON.parse(xhr.responseText);
-						var uploadedImg = JSON.parse(localStorage.getItem('img'));
+						//var message.img = JSON.parse(localStorage.getItem('img'));
                      	if(data.status=="error"){
                          	alert(data.status);
                         }else{
@@ -381,14 +379,14 @@
                             $('#my-progress').hide();
 							
 							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-							if(uploadedImg == null){
-								uploadedImg = []
-								uploadedImg.push(data.imageName);
+							if(message.img == null){
+								message.img = []
+								message.img.push(data.imageName);
 							}
 							else{ //append the newly uploaded image to the local storage
-								uploadedImg.push(data.imageName);
+								message.img.push(data.imageName);
 							}
-							localStorage.setItem('img', JSON.stringify(uploadedImg));
+							localStorage.setItem('allMessage', JSON.stringify(allMessage));
 							Create.updateMsg();
                         }
                          	
@@ -418,7 +416,7 @@
 						},
 						complete: function(xhr) {
 							var data = JSON.parse(xhr.responseText);
-							var uploadedVideo = JSON.parse(localStorage.getItem('video'));
+							//var message.video = JSON.parse(localStorage.getItem('video'));
 							videoForm.clearForm();
 							progressBar.width('0%');
 							if(data.status=="error"){
@@ -433,14 +431,14 @@
 								$('#uploadVideoBtn').hide();
 								
 								//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-								if(uploadedVideo == null){
-									uploadedVideo = [];
-									uploadedVideo[0] = data.msg;
+								if(message.video == null){
+									message.video = [];
+									message.video[0] = data.msg;
 								}
 								else{ //append the newly uploaded image to the local storage
-									uploadedVideo.push(data.msg);
+									message.video.push(data.msg);
 								}
-								localStorage.setItem('video', JSON.stringify(uploadedVideo));
+								localStorage.setItem('allMessage', JSON.stringify(allMessage));
 								
 								//Boardcast update
 								Create.updateMsg();
@@ -455,13 +453,12 @@
     $('body').on('click', '#imgList .removeThumbnail', function(evt) {
 
     		$(this).parent().remove();
-			var uploadedImg = JSON.parse(localStorage.getItem('img'));
-    		var uploadedImgLength = uploadedImg.length;
+			//var message.img = JSON.parse(localStorage.getItem('img'));
+    		var uploadedImgLength = message.img.length;
 			for(var i=0; i < uploadedImgLength; i++){
-				if(uploadedImg[i] == $(this).parent().find('.imgUrl').attr('value')){
-					uploadedImg.splice(i, 1);
-					localStorage.setItem('img', JSON.stringify(uploadedImg));
-					
+				if(message.img[i] == $(this).parent().find('.imgUrl').attr('value')){
+					message.img.splice(i, 1);
+					localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				}	
 			}
 			
@@ -478,12 +475,12 @@
 	$('body').on('click', '#videoList .removeThumbnail', function(evt) {
     		$(this).parent().remove();
 			
-			var uploadedVideo = JSON.parse(localStorage.getItem('video'));
-    		var uploadedVideoLength = uploadedVideo.length;
+			//var message.video = JSON.parse(localStorage.getItem('video'));
+    		var uploadedVideoLength = message.video.length;
 			for(var i=0; i < uploadedVideoLength; i++){
-				if(uploadedVideo[i] == $(this).parent().find('.imgUrl').attr('value')){
-					uploadedVideo.splice(i, 1);
-					localStorage.setItem('video', JSON.stringify(uploadedVideo));
+				if(message.video[i] == $(this).parent().find('.imgUrl').attr('value')){
+					message.video.splice(i, 1);
+					localStorage.setItem('allMessage', JSON.stringify(allMessage));
 					
 				}	
 			}
@@ -502,12 +499,11 @@
 	//remove the url preview holder
 	$('body').on('click', '.removeYoutube', function(evt) {
 		evt.preventDefault();
-		var url = JSON.parse(localStorage.getItem('url'));
-		if(url!=null){
-			url;
-			localStorage.setItem('url', null);
+		//var url = JSON.parse(localStorage.getItem('url'));
+		if(message.url!=null){
+			message.url = null;
+			localStorage.setItem('allMessage', JSON.stringify(allMessage));
 		}
-	
 	    // Update UI
 	    $('#linkPreview').css('padding','0%');
 	    $('#linkPreview').css('border','0');
@@ -540,7 +536,7 @@
 					},
 					dataType : "json"
 				}).done(function(data) {
-					var uploadedImg = JSON.parse(localStorage.getItem('img'));
+					//var message.img = JSON.parse(localStorage.getItem('img'));
 					
 					$( "#sketchModal" ).popup( "close" );
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ data.imageName +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+data.imageName+'" /></li>');
@@ -549,14 +545,14 @@
 					$('#type').selectmenu("refresh", true);
 					canvasData = "";
 						//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
-							if(uploadedImg == null){
-								uploadedImg = [];
-								uploadedImg.push(data.imageName);
+							if(message.img == null){
+								message.img = [];
+								message.img.push(data.imageName);
 							}
 							else{ //append the newly uploaded image to the local storage
-								uploadedImg.push(data.imageName);
+								message.img.push(data.imageName);
 							}
-							localStorage.setItem('img', JSON.stringify(uploadedImg));
+							localStorage.setItem('allMessage', JSON.stringify(allMessage));
 							Create.updateMsg();
 
 				});
@@ -577,10 +573,10 @@
 		$('#colors-holder div.color-thumb-container div.color-thumb').removeClass('active');
 		$(this).addClass('active');
 		
+				
 		// Store notepaper color in localstorage		
-		bgcolorStorage = [];
-		bgcolorStorage.push($('#colors-holder > .color-thumb-container > .active').attr('value'));
-		localStorage.setItem('bg-color', JSON.stringify(bgcolorStorage));
+		message.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
+		localStorage.setItem('allMessage', JSON.stringify(allMessage));
 		
 		Create.updateMsg();
 	});
@@ -598,12 +594,138 @@
 	}
 	
 	
+	$('body').on('click', '.listItem', function(evt) {
+		//event.preventDefault();
+		
+		var messageOrder = $(this).attr('messageOrder');
+		
+		/*allMessage = JSON.parse(localStorage.getItem('allMessage'));
+		if(allMessage == null){
+			allMessage = [];
+		}*/
+		
+		//TODO
+		//Fetch all the data from the local storage
+		//see if an ID is provided
+		message = allMessage[messageOrder];
+		
+		//Fetch all the uploaded image thumbnails
+			var imgList = $('#imgList');
+			imgList.empty();
+			if(message.img != null){
+				var uploadedImgLength = message.img.length;
+				for(var i=0; i < uploadedImgLength; i++){
+					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ message.img[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+message.img[i]+'" /></li>');
+				}
+				if(uploadedImgLength > 0){
+					// Change option
+					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
+					$('#type').selectmenu("refresh", true);
+				}
+			}
+			//Fetch all the uploaded video thumbnails
+			var videoList = $('#videoList');
+			videoList.empty();
+			if(message.video != null){
+				var uploadedVideoLength = message.video.length;
+				for(var i=0; i < uploadedVideoLength; i++){
+					videoList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/video/'+ message.video[i].replace('.mp4','.jpg') +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+message.video[i]+'" /></li>');
+				}
+				if(uploadedVideoLength > 0){
+					$('#uploadVideoBtn').hide();
+					// Change option
+					$('#type').val("5").attr('selected', true).siblings('option').removeAttr('selected');
+					$('#type').selectmenu("refresh", true);
+				}
+			}
+			
+			
+			$('#textContent').val("");
+			if(message.text!=null){ //Fetch message.text from local storage
+				$('#textContent').val(message.text); 
+			}
+			
+			if(message.type!=null){ //Fetch type from local storage
+				$('#type').val(message.type).attr('selected', true).siblings('option').removeAttr('selected');
+				$('#type').selectmenu("refresh", true);
+			}
+			
+			$('div.note-thumb').each(function() {
+				$(this).removeClass('owned');
+			});
+			
+			$('div.color-thumb').each(function() {
+				$(this).removeClass('active');
+			});
+			
+			if(message.notepaperId){
+				$('#notepaperId').val(message.notepaperId);
+				$('div.note-thumb[position=\'' + message.notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
+			}
+			
+			if(message.messageId){
+				$('#messageId').val(message.messageId);
+			}
+			
+			if(message.bgcolor){
+				$('div.color-thumb[value=\'' + message.bgcolor + '\']').addClass('active'); //indicate the current color on setting
+			}
+		
+	});
+	
+	
+	$(document).on('pagecontainershow', function(e, ui) {
+	
+		var thisPage = $(':mobile-pagecontainer').pagecontainer('getActivePage').attr('id');
+		if(thisPage == "menu"){
+			var numberOfMessage = allMessage.length;
+			var listItems = [];
+			for(var i = 0; i < numberOfMessage; i++){
+				listItems.push('<li><a href="#post" class="listItem" messageOrder="'+ i +'">');
+				listItems.push(allMessage[i].text);
+				listItems.push('</a></li>');
+			}
+			$('#messageList').html(listItems.join(''));
+			$("#messageList").listview("refresh");
+		}
+	});
+	
+	
+	$("#menuBtn").on("click", function(event ) {
+		message.text = $('#textContent').val();
+		localStorage.setItem('allMessage', JSON.stringify(allMessage));
+	});
+	
+	$(".addNewMsgBtn").on("click", function(event ) {
+		message.text = $('#textContent').val();
+		Create.occupyNotepaper();
+		var imgList = $('#imgList');
+		var videoList = $('#videoList');
+		$('#textContent').val("");
+		imgList.empty();
+		videoList.empty();
+		
+		$('div.color-thumb').each(function() {
+			$(this).removeClass('active');
+		});
+		$('div.color-thumb[value=\'#FFFFFF\']').addClass('active'); 
+		
+		// Change option
+        $('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
+		$('#type').selectmenu("refresh", true);
+		message = {};
+		message.bgcolor = "#FFFFFF"; //initialize the bgcolor to white
+		allMessage[allMessage.length] = message;
+		
+	});
+	
+	/*
 	$("#positionBtn").on("click", function(){
 		// Check unoccupied notepapers and show results
 		//console.log('[DEBUG] queryPositions()');
 		Create.queryPositions();
 	});
-	
+	*/
 	
 	$("#postBtn").on("click", function(e){		
 		e.preventDefault();
@@ -612,7 +734,10 @@
 			$('a.ui-btn-active').removeClass('ui-btn-active');
 		},200);
 	});
-	</script>
 
+	
+	
+	</script>
+	<script src="/js/client_ws.js"></script>
 	</body>
 </html>

@@ -16,11 +16,13 @@
 			
 			//save message to mysql db
 			$('#saveBtn').click(function(){
-			
+				
+				localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				var text = $('#textContent').val();
-				localStorage.setItem('text', text);
+				
+				//localStorage.setItem('text', text);
 				var type = $('#type').val();
-				localStorage.setItem('type', type);
+				//localStorage.setItem('type', type);
 				
         		Create.saveMsg();
 				return false;
@@ -35,7 +37,6 @@
 				var newNotepaperId = $(this).attr('position');
 				var oldNotepaperId = $('#notepaperId').val();
 				var messageId = $('#messageId').val();
-
 				console.log("msg: " + messageId);
 				Create.changePosition({newNotepaperId: newNotepaperId, oldNotepaperId: oldNotepaperId, messageId: messageId});
 				return false;
@@ -65,105 +66,107 @@
 			this.socket.on('queryPositionsHandler', this.queryPositionsHandler);
 			
 			//Check whether the user has been occupied a notepaper before
-			var notepaperId = localStorage.getItem('notepaperId');
-			var messageId = localStorage.getItem('messageId');
-
-			if(notepaperId==null || messageId==null){ //fetch a empty notepaper from server
+			//var notepaperId = localStorage.getItem('notepaperId');
+			//var messageId = localStorage.getItem('messageId');
+			
+			if(message.notepaperId==null || message.messageId==null){ //fetch a empty notepaper from server
 				this.occupyNotepaper();
 			}
 			else { //use the original notepaper
-				$('#notepaperId').val(notepaperId);
-				$('#messageId').val(messageId);
+				$('#notepaperId').val(message.notepaperId);
+				$('#messageId').val(message.messageId);
 			}
-			
-			
 		},
 		
 		// Sends a message to the server
 		updateMsg : function() {
-			var message = {};
-			message.id = parseInt($('#notepaperId').val());
-			message.type = parseInt($('#type').val());
-			message.content = $('#textContent').val();
-			message.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
-			message.msgId = parseInt(localStorage.getItem('messageId'));
+			var msg = {};
+			msg.id = parseInt($('#notepaperId').val());
+			msg.type = parseInt($('#type').val());
+			msg.content = $('#textContent').val();
+			msg.msgId = parseInt($('#messageId').val());
+			msg.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
 			//console.log('update '+content);
 			
 			var url = $('#url').val();
 			var url_title = $('#urlTitle').val();
 			var url_summary = $('#urlSummary').val();
 			var url_thumbnail = $('#urlThumbnail').val();
-			var img = JSON.parse(localStorage.getItem('img'));
-			var video = JSON.parse(localStorage.getItem('video'));
+			var img = message.img;
+			var video = message.video;
+			//var img = JSON.parse(localStorage.getItem('img'));
+			//var video = JSON.parse(localStorage.getItem('video'));
 			
 			// Check id
-			if(message.id < maxId && message.id <= 0){
+			if(msg.id < maxId && msg.id <= 0){
 				return false;
 			}
 			// Prepare the content
-			if(message.type==1){
+			if(msg.type==1){
 			
 			}
-			else if(message.type==3){ //Gallery
-				message.img = img;
-			} else if(message.type==4){ //Url
-				message.url = url;
-				message.url_title = url_title;
-				message.url_summary = url_summary;
-				message.url_thumbnail = url_thumbnail;
-			} else if(message.type==5){ //Video
-				message.video = video;
+			else if(msg.type==3){ //Gallery
+				msg.img = img;
+			} else if(msg.type==4){ //Url
+				msg.url = url;
+				msg.url_title = url_title;
+				msg.url_summary = url_summary;
+				msg.url_thumbnail = url_thumbnail;
+			} else if(msg.type==5){ //Video
+				msg.video = video;
 			} else {
 				console.log('Invalid type');
 				return false;
 			}
-			// Send message
-			this.socket.emit('updateMsg', [message]);
+			// Send msg
+			this.socket.emit('updateMsg', [msg]);
 			
 			return false;
 		},
 		
 		//save message to mysql db
 		saveMsg : function() {
-			var message = {};
-			message.id = parseInt($('#notepaperId').val());
-			message.type = parseInt($('#type').val());
-			message.content = $('#textContent').val();
+			var msg = {};
+			msg.id = parseInt($('#notepaperId').val());
+			msg.type = parseInt($('#type').val());
+			msg.content = $('#textContent').val();
 			//console.log('update '+content);
 			
 			var url = $('#url').val();
 			var url_title = $('#urlTitle').val();
 			var url_summary = $('#urlSummary').val();
 			var url_thumbnail = $('#urlThumbnail').val();
-			var img = JSON.parse(localStorage.getItem('img'));
-			var video = JSON.parse(localStorage.getItem('video'));
+			var img = message.img;
+			var video = message.video;
+			//var img = JSON.parse(localStorage.getItem('img'));
+			//var video = JSON.parse(localStorage.getItem('video'));
 			
 			// Check id
-			if(message.id < maxId && message.id <= 0){
+			if(msg.id < maxId && msg.id <= 0){
 				return false;
 			}
 			// Prepare the content
-			if(message.type==1){
+			if(msg.type==1){
 			
 			}
-			else if(message.type==3){ //Gallery
-				message.img = img;
-			} else if(message.type==4){ //Url
-				message.url = url;
-				message.url_title = url_title;
-				message.url_summary = url_summary;
-				message.url_thumbnail = url_thumbnail;
-			} else if(message.type==5){ //Video
-				message.video = video;
+			else if(msg.type==3){ //Gallery
+				msg.img = img;
+			} else if(msg.type==4){ //Url
+				msg.url = url;
+				msg.url_title = url_title;
+				msg.url_summary = url_summary;
+				msg.url_thumbnail = url_thumbnail;
+			} else if(msg.type==5){ //Video
+				msg.video = video;
 			} else {
 				console.log('Invalid type');
 				return false;
 			}
 			//send save message
 			this.socket.emit('saveMsg', {
-				id: message.id,
-				type: message.type,
-				content: JSON.stringify(message)
+				id: msg.id,
+				type: msg.type,
+				content: JSON.stringify(msg)
 			});
 			
 			return false;
@@ -180,7 +183,8 @@
 				$('#urlTitle').val(url.title);
 				$('#urlSummary').val(url.summary);
 				$('#urlThumbnail').val(url.thumbnail);
-				localStorage.setItem('url', JSON.stringify(url));
+				message.url = JSON.stringify(url);
+				localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				
 				//append the information to the link preview div
 				var holder = $("#linkPreview");
@@ -204,16 +208,18 @@
 			}
 		},
 		
-		occupyNotepaper: function(data) {
-			this.socket.emit('occupyNotepaper', data);
+		occupyNotepaper: function() {
+			this.socket.emit('occupyNotepaper', {});
 		},
 		
 		occupyNotepaperResult: function(notepaper) {
 			$('#notepaperId').val(notepaper.notepaperId);
-			localStorage.setItem('notepaperId', notepaper.notepaperId);
+			message.notepaperId = notepaper.notepaperId;
+			
 			$('div.note-thumb[position=\'' + notepaper.notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
 			$('#messageId').val(notepaper.messageId);
-			localStorage.setItem('messageId', notepaper.messageId);
+			message.messageId = notepaper.messageId;
+			localStorage.setItem('allMessage', JSON.stringify(allMessage));
 		},
 		
 		changePosition: function(data) {
@@ -223,7 +229,8 @@
 		changePositionSuccess: function(notepaper) {
 			var oldNotepaperId = $('#notepaperId').val();
 			$('#notepaperId').val(notepaper.newNotepaperId);
-			localStorage.setItem('notepaperId', notepaper.newNotepaperId);
+			message.notepaperId = notepaper.newNotepaperId;
+			localStorage.setItem('allMessage', JSON.stringify(allMessage));
 			$( "#positionModal" ).popup( "close" );
 			$('div.note-thumb[position=\'' + oldNotepaperId + '\']').removeClass('owned');
 			$('div.note-thumb[position=\'' + notepaper.newNotepaperId + '\']').addClass('owned'); //indicate the current notepaper
@@ -258,5 +265,7 @@
 		}
 		*/
 	};
-
+	this.message = message;
+	this.allMessage = allMessage;
+	console.log(JSON.stringify(allMessage));
 }());

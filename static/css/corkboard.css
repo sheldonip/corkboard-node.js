@@ -356,7 +356,7 @@ div#positionModal-popup,
 div#fetchModal-popup{ width: 90%; }
 
 .ui-header .ui-title, .ui-footer .ui-title{ 
-	font-size: 1.4em; 
+	*font-size: 1.4em; 
 	font-family: OpenSans-Regular, cursive;
 }
 

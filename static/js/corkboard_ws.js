@@ -21,31 +21,35 @@
 		// Adds a new message
 		add : function(data) {
 			
-			var id, type, msgId, bgcolor, notepaperInner = [];
+			var id, type, msgId, bgcolor, notepaperInner = [], emptyString = "";
 			
 			for(var i=0 ; notepaper = data[i] ; i++){
 			
 			id = parseInt(notepaper.id);
+			if(!id){
+				break;
+			}
+			
 			type = parseInt(notepaper.type);
 			bgcolor = String(notepaper.bgcolor);
+			
 			msgId = parseInt(notepaper.msgId);
 
 			// Check id
 			if(id > maxId && id <= 0){
 				return false;
 			}
-
+			
 			// Check background color
 			if(!bgcolor || bgcolor == 'null' || bgcolor == 'undefined'){
 				bgcolor = '#FFFFFF';
 			}
 
 			// Check message Id
-			console.log('[DEBUG] ' + 'msgId: ' + msgId);
+			console.log('[DEBUG] ' + 'msgId: ' + bgcolor);
 			if(!msgId || isNaN(msgId)){
 				return false;
 			}
-			
 			// Bug: cannot replace \\n by \<br>
 			//content.content = content.content.replace('\n','<br>');'
 			
@@ -54,24 +58,26 @@
 				$('#note-'+id+' div#msg-'+msgId).remove();
 				$('#note-'+id).append('<div class="content-container" id="msg-' + msgId + '" bgcolor="' + bgcolor + '"></div>');
 			}
-
+			
 			if(type==1){
 
-				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
-												
+				notepaperInner.push('<div class="text">'+(notepaper.content || emptyString) +'</div>');
+				
 			} else if(type==3){
-				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
+				notepaperInner.push('<div class="text">'+(notepaper.content || emptyString) +'</div>');
 				notepaperInner.push('<div id="album-1" class="album">');
 				notepaperInner.push('<ul>');
 				
-				for(var j = 0; j < notepaper.img.length; j++){
+				if(notepaper.img){
+				var galleryLength = notepaper.img.length;
+				for(var j = 0; j < galleryLength; j++){
 					notepaperInner.push('<li>');
 					notepaperInner.push('<div id="album-1-1">');
 					notepaperInner.push('<img class="notepaper-img" src="'+ base_url +'uploads/resized/'+ notepaper.img[j] +'">');
 					notepaperInner.push('</div>');
 					notepaperInner.push('</li>');
 				}
-				
+				}
 				notepaperInner.push('</ul>');
 			   notepaperInner.push('</div>');
 			   
@@ -92,7 +98,7 @@
 						notepaperInner.push('</div>');
 					}
 					notepaperInner.push('<div class="urlTitle"><h5><a target="_blank" href="'+notepaper.url+'">'+notepaper.url_title+'</a></h5></div>');
-					notepaperInner.push('<div class="urlDescription">'+notepaper.url_summary || '' +'</div>');
+					notepaperInner.push('<div class="urlDescription">'+ (notepaper.url_summary || emptyString) +'</div>');
 					notepaperInner.push('</div>');
 					notepaperInner.push('</div>');
 				}
@@ -103,7 +109,7 @@
 				notepaperInner.push('<video class="notepaper-video" autoplay loop muted>');
 				notepaperInner.push('<source src="'+ base_url +'uploads/video/'+notepaper.video+'" type="video/mp4">');                  
 				notepaperInner.push('</video>');
-				notepaperInner.push('<div class="text">'+notepaper.content+'</div>');
+				notepaperInner.push('<div class="text">'+ (notepaper.content || emptyString) +'</div>');
 												
 			} else { // the message is expired or deleted
 				//notepaperInner.push('<img class="notepaper-qrCode" src="'+ base_url +'img/qrcode/' + qrUrls[notepaper.id] + '">');
