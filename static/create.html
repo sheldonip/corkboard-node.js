@@ -127,7 +127,7 @@
 			</div>
 			<div role="main" class="ui-content" id="canvas-holder">
 				<div class="tools"></div>
-				<canvas id="sketchpad" width="270" height="296"></canvas>
+				<canvas id="sketchpad" width="270" height="220"></canvas>
 			</div>
 			<div role="footer" id="canvas-footer" class="modal-footer">
       			<button type="button" id="clear-sketch" class="btn btn-default" data-dismiss="">Clear</button>
@@ -639,7 +639,11 @@
 				}
 			}
 			
-			
+			//remove link preview
+			$('#linkPreview').css('padding','0%');
+			$('#linkPreview').css('border','0');
+			$('#linkPreview').children().remove();
+						
 			$('#textContent').val("");
 			if(message.text!=null){ //Fetch message.text from local storage
 				$('#textContent').val(message.text); 
@@ -669,6 +673,22 @@
 			
 			if(message.bgcolor){
 				$('div.color-thumb[value=\'' + message.bgcolor + '\']').addClass('active'); //indicate the current color on setting
+			}
+			
+			if(message.url){ //if it is an url, ask server side to scrape the url
+				//append the information to the link preview div
+				var holder = $("#linkPreview");
+				holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
+				if(message.url.thumbnail){
+					holder.append('<div class="thumbnailHolder"><img class="urlThumbnail" src="'+ message.url.thumbnail +'" /></div>');
+				}
+				holder.append('<div class="urlTitle"><h5><a target="_blank" href="'+ message.url.url +'">' + message.url.title + '</a></h5></div>');
+				if(message.url.summary){
+					holder.append('<div class="urlDescription">'+message.url.summary+'</div>');
+				}
+				// Update UI
+				$('#linkPreview').css('padding','2%');
+				$('#linkPreview').css('border','1px solid #CCCCCC');
 			}
 		
 	});
@@ -704,11 +724,17 @@
 		$('#textContent').val("");
 		imgList.empty();
 		videoList.empty();
+		//remove link preview
+		$('#linkPreview').css('padding','0%');
+	    $('#linkPreview').css('border','0');
+		$('#linkPreview').children().remove();
 		
+		//initialize notepaper color
 		$('div.color-thumb').each(function() {
 			$(this).removeClass('active');
 		});
 		$('div.color-thumb[value=\'#FFFFFF\']').addClass('active'); 
+		$('#uploadVideoBtn').show();
 		
 		// Change option
         $('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');

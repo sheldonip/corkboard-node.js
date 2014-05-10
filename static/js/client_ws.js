@@ -183,7 +183,7 @@
 				$('#urlTitle').val(url.title);
 				$('#urlSummary').val(url.summary);
 				$('#urlThumbnail').val(url.thumbnail);
-				message.url = JSON.stringify(url);
+				message.url = url;
 				localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				
 				//append the information to the link preview div
@@ -215,11 +215,15 @@
 		occupyNotepaperResult: function(notepaper) {
 			$('#notepaperId').val(notepaper.notepaperId);
 			message.notepaperId = notepaper.notepaperId;
-			
+			//initialize notepaper selection
+			$('div.note-thumb').each(function() {
+				$(this).removeClass('owned');
+			});
 			$('div.note-thumb[position=\'' + notepaper.notepaperId + '\']').addClass('owned'); //indicate the current notepaper on setting
 			$('#messageId').val(notepaper.messageId);
 			message.messageId = notepaper.messageId;
 			localStorage.setItem('allMessage', JSON.stringify(allMessage));
+			Create.updateMsg();
 		},
 		
 		changePosition: function(data) {

@@ -115,9 +115,12 @@
 				//notepaperInner.push('<img class="notepaper-qrCode" src="'+ base_url +'img/qrcode/' + qrUrls[notepaper.id] + '">');
 			}
 			
-			$('#note-'+id).find('#msg-'+msgId).html(notepaperInner.join(''));
-			if(!notepaper.bgcolor){ notepaper.bgcolor = '#FFF'; }
-			$('#note-'+id).css('background-color',notepaper.bgcolor);				
+			var targetNote = $('#note-'+id).find('#msg-'+msgId);
+			targetNote.html(notepaperInner.join(''));
+			targetNote.attr('bgcolor', bgcolor);
+			
+			//if(!notepaper.bgcolor){ notepaper.bgcolor = '#FFF'; }
+			$('#note-'+id).css('background-color',bgcolor);
 			
 			notepaperInner = [];
 			}	// End of for-loop
