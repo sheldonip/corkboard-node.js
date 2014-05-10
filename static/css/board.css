@@ -321,7 +321,7 @@ div.content-container .notepaper-img{
     /* max-height: 210px; */
     /* max-width: 370px; */
     position: relative;
-    width: 50%;
+    width: 55%;
 } 
 div.banner-container .notepaper-img{
     max-height: 350px;
@@ -373,11 +373,14 @@ div.banner-container .notepaper-img{
     body{ background: url('../img/corkboard.jpg'); }
 }
 
+@media only screen and (min-height : 1000px){
+    div.content-container .notepaper-img{
+        width: 70%;
+    }
+}
+
 @media only screen and (min-height : 1200px){
     div.content-container .notepaper-img{
-        /* max-height: 210px; */
-        /* max-width: 370px; */
-        position: relative;
         width: 80%;
     }
 }
