@@ -325,6 +325,12 @@ div.tools{
 	width: 100%;
 	*padding: 10px 0;
 	border-radius: 0px;
+	background-color: #F0D4AF;
+	border-color: #666666;
+}
+
+#footer ul li a:active{
+	background-color: #e8e8e8;
 }
 
 /* For modern browsers */
