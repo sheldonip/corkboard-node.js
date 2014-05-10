@@ -20,9 +20,9 @@
 		<div data-role="page" id="post">
 	
 		<div data-role="header">
-			<a href="#menu" id="menuBtn" class="ui-btn-left ui-btn-corner-all ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow" title=" menu " data-form="ui-icon" data-role="button" role="button"> menu </a>
+			<!-- <a href="#menu" id="menuBtn" class="ui-btn-left ui-btn-corner-all ui-btn ui-icon-bars ui-btn-icon-notext ui-shadow" title=" menu " data-form="ui-icon" data-role="button" role="button"> menu </a> -->
 			<h1>Post Message</h1>
-			<a class="ui-btn-right ui-btn-corner-all ui-btn ui-icon-plus ui-btn-icon-notext ui-shadow addNewMsgBtn" title=" add " data-form="ui-icon" data-role="button" role="button"> add </a>
+			<!-- <a class="ui-btn-right ui-btn-corner-all ui-btn ui-icon-plus ui-btn-icon-notext ui-shadow addNewMsgBtn" title=" add " data-form="ui-icon" data-role="button" role="button"> add </a> -->
 		</div>
 		
 		<div role="main" class="ui-content">
@@ -187,14 +187,17 @@
         
 		<a href='#sketchpad' data-clear='true' id="real-clear-canvas">Clear</a>
 		</div><!-- /content -->
-		
+			
 		<div id="footer" data-role="footer" style="overflow:hidden;" data-position="fixed">
 			<div data-role="navbar">
 				<ul>
 					<li>
+						<a href="#menu" class="ui-btn ui-shadow ui-corner-all ui-icon-bars ui-btn-icon-top menuBtn">Menu</a>
+						<!--
 						<a id="postBtn" class="btn btn-primary btn-lg">
-						Post
-						</a>			
+							Post
+						</a>
+						-->			
 					</li>
 					<!--<li>
 						<a id="sketchBtn" class="btn btn-info btn-lg" href="#sketchModal" data-rel="popup" data-position-to="window" data-transition="pop">
@@ -203,14 +206,18 @@
 						</a>
 					</li>-->
 					<li>
-						<a id="fetchBtn" class="btn btn-primary btn-lg" href="#fetchModal" data-rel="popup" data-position-to="window" data-transition="pop">
+						<a class="ui-btn ui-shadow ui-corner-all ui-icon-plus ui-btn-icon-top addNewMsgBtn">Add</a>
+						<!-- <a id="fetchBtn" class="btn btn-primary btn-lg" href="#fetchModal" data-rel="popup" data-position-to="window" data-transition="pop">
 						Fetch
-						</a>
+						</a> -->
 					</li>
 					<li>
+						<a id="positionBtn" class="ui-btn ui-shadow ui-corner-all ui-icon-gear ui-btn-icon-top" href="#positionModal" data-rel="popup" data-position-to="window" data-transition="pop">Setting</a>
+						<!--
 						<a id="positionBtn" class="btn btn-default btn-lg" href="#positionModal" data-rel="popup" data-position-to="window" data-transition="pop">
 							Setting
 						</a>
+						-->
 					</li>					
 				</ul>
 			</div><!-- /navbar -->
@@ -711,7 +718,7 @@
 	});
 	
 	
-	$("#menuBtn").on("click", function(event ) {
+	$(".menuBtn").on("click", function(event ) {
 		message.text = $('#textContent').val();
 		localStorage.setItem('allMessage', JSON.stringify(allMessage));
 	});
