@@ -138,22 +138,13 @@ io.sockets.on('connection', function (socket) {
 	socket.on('occupyNotepaper', function (data) {
 		console.log('[DEBUG] emptyMessages');
 		var msgId, notepaperId;
-		connection.query('SELECT * FROM notepaper WHERE occupied = 0 limit 1', function(err, rows) {
+		connection.query('SELECT notepaper_id, COUNT(*) AS numberOfMsg FROM message GROUP BY notepaper_id ORDER BY numberOfMsg LIMIT 1;', function(err, rows) {
 			// return JSON response
-				if(rows.length>0){
-					notepaperId = rows[0].id;
-				} else {
-					//if full, random a notepaper
-					notepaperId = Math.floor(Math.random()*8) + 1;
-				}
-				var message  = {type: 1};
+				notepaperId = rows[0].notepaper_id;
+				var message  = {type: 1, notepaper_id: notepaperId};
 				connection.query('INSERT INTO message SET ?', message, function(err, result) {
 					msgId = result.insertId;
-					
-					connection.query('UPDATE message SET notepaper_id = ? WHERE id = ?', [notepaperId, msgId], function(err2, result2) {
-						socket.emit('occupyNotepaperResult', {notepaperId: notepaperId, messageId: msgId});
-					});
-		
+					socket.emit('occupyNotepaperResult', {notepaperId: notepaperId, messageId: msgId});
 				});
 		});
 	});
