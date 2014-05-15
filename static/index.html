@@ -102,7 +102,7 @@
         <script>
 			Corkboard.initialize(base_url);
   	      	
-            $( document ).ready(function() {
+            $( document ).ready(function() {            	
                 $(".album ul li:first-child").animate({opacity: 1.0}, 800);
                 $(".album ul li:not(:first-child)").animate({opacity: 0.0}, 800);
                 
@@ -120,8 +120,10 @@
 					);
                 }, 3000);
 
-                // Time-sharing messages animation
-                setInterval(function() {
+
+
+
+                /*setInterval(function() {
 					$('.note').each(function(){
 						if( $(this).children('.content-container').length > 1){
 							var firstMsg = $(this).children('div.content-container').first().detach(); // Remove the first element
@@ -136,9 +138,8 @@
 							$(this).css('background-color', bgcolor);
 							$(this).children('div.content-container:not(:nth-child(2))').css('opacity', 0.0);
 						}
-					}
-					);
-                }, 10000);
+					});
+                }, 10000);*/
 
 				// QR code
 				var QRHeight = $('#note-9').height();
@@ -153,7 +154,6 @@
 				});
 				
             });
-			
         </script>
     </body>
 </html>

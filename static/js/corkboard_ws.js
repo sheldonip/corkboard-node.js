@@ -1,6 +1,9 @@
 // Define all types of messages
 (function () {
 	var maxId = 8;
+	var noteAni = [];	
+	var INV = 3000; //ms, Default time interval for each notepaper
+
 	window.Corkboard = {		
 		socket : null,
   
@@ -16,12 +19,14 @@
 			
 			//Fetch all notepapers from db
 			this.socket.emit('fetchAllNotepapers', {});
+
+			noteAnimation();
 		},
 		
 		// Adds a new message
 		add : function(data) {
 			
-			var id, type, msgId, bgcolor, notepaperInner = [], emptyString = "";
+			var id, type, msgId, bgcolor, duration, notepaperInner = [], emptyString = "";
 			
 			for(var i=0 ; notepaper = data[i] ; i++){
 			
@@ -46,9 +51,14 @@
 			}
 
 			// Check message Id
-			console.log('[DEBUG] ' + 'msgId: ' + bgcolor);
 			if(!msgId || isNaN(msgId)){
 				return false;
+			}
+
+			if(!notepaper.url_duration || parseInt(notepaper.url_duration*1000) < INV){ 
+				duration = INV; 
+			} else{
+				duration = parseInt(notepaper.url_duration*1000);
 			}
 			// Bug: cannot replace \\n by \<br>
 			//content.content = content.content.replace('\n','<br>');'
@@ -56,7 +66,7 @@
 			// Prepare container
 			if($('#note-'+id+' div#msg-'+msgId).length <= 0){
 				$('#note-'+id+' div#msg-'+msgId).remove();
-				$('#note-'+id).append('<div class="content-container" id="msg-' + msgId + '" bgcolor="' + bgcolor + '"></div>');
+				$('#note-'+id).append('<div class="content-container" id="msg-' + msgId + '" bgcolor="' + bgcolor + '" duration=\"' + duration + '\"></div>');
 			}
 			
 			if(type==1){
@@ -88,7 +98,7 @@
 				var youtubeMatch = notepaper.url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
 				if(youtubeMatch){
 					var videoId = youtubeMatch[1];
-					notepaperInner.push('<iframe id="ytplayer-1" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+videoId+'?autoplay=1&controls=0&loop=1&playlist='+videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen></iframe>');                  
+					notepaperInner.push('<iframe id="ytplayer-'+ msgId + '" class="ytplayers" type="text/html" src="https://www.youtube.com/embed/'+videoId+'?autoplay=1&controls=0&loop=1&playlist='+videoId+'&rel=0&showinfo=0&theme=light&enablejsapi=1" frameborder="0" allowfullscreen"></iframe>');                  
 					notepaperInner.push('</div>');
 				}else{
 					notepaperInner.push('<div class="boardLinkPreview">');
@@ -120,7 +130,8 @@
 			targetNote.attr('bgcolor', bgcolor);
 			
 			//if(!notepaper.bgcolor){ notepaper.bgcolor = '#FFF'; }
-			$('#note-'+id).css('background-color',bgcolor);
+			$('#note-'+id).css('background-color',bgcolor);	
+			noteAnimation();		
 			
 			notepaperInner = [];
 			}	// End of for-loop
@@ -130,8 +141,42 @@
 			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).html("");
 			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).remove();
 			$('#note-'+notepaper.notepaperId).css('background-color','#FFF');
+
+			noteAnimation();
 			
 		}
 		
+	};
+
+	function noteAnimation(){
+		// Time-sharing messages animation
+        $('.note').each(function(index){
+        	var that = $(this);
+			var interval = INV;
+			clearInterval(noteAni[index]);
+
+			$(this).children('.content-container').each(function(){
+				var d;
+				d = parseInt($(this).attr('duration'));
+				if(interval < d){
+					interval = d;
+				}
+			});
+			
+			noteAni[index] = setInterval(function() {
+				if( that.children('.content-container').length > 1){
+					var firstMsg = that.children('div.content-container').first().detach(); // Remove the first element
+					that.append(firstMsg); // Add it back to the end	
+
+					var bgcolor = that.children('div.content-container').first().attr('bgcolor');
+					if(!bgcolor){ bgcolor = '#FFFFFF'; }
+
+										
+					that.children('div.content-container:nth-child(2)').animate({opacity: 1.0}, 800);
+					that.css('background-color', bgcolor);
+					that.children('div.content-container:not(:nth-child(2))').css('opacity', 0.0);				
+				}
+            }, interval);
+        });
 	};
 }());

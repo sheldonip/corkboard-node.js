@@ -86,6 +86,7 @@ io.sockets.on('connection', function (socket) {
 					preview.thumbnail = youtubeObject.data.thumbnail.sqDefault;
 					preview.title = youtubeObject.data.title;
 					preview.summary = youtubeObject.data.description.substr(0, 100);
+					preview.duration = parseInt(youtubeObject.data.duration);
 					preview.url = url;
 					socket.emit('scrapeUrlResult', preview);
 				}
