@@ -56,7 +56,7 @@ io.sockets.on('connection', function (socket) {
 		console.log('[DEBUG] fetchAllNotepapers');
 		
 		// Use the connection
-		connection.query('SELECT id AS msgId, content, notepaper_id AS id, bgcolor, img, video, url, url_title, url_summary, url_thumbnail FROM message', function(err, rows){	
+		connection.query('SELECT id AS msgId, content, type, notepaper_id AS id, bgcolor, img, video, url, url_title, url_summary, url_thumbnail FROM message', function(err, rows){	
 			if (err) throw err;
 			// return JSON response
 			socket.emit('updateMsg', rows);

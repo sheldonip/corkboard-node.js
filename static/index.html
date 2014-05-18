@@ -201,7 +201,7 @@
 						}
 					}
 					);
-                }, 3000);
+                }, 5000);
 
 				// QR code
 				var QRHeight = $('#note-9').height()* 0.7;
@@ -221,7 +221,7 @@
 			//When the youtube video is ended
 				function onPlayerStateChange(event) {
 					if (event.data == YT.PlayerState.ENDED){
-						console.log("Youtube state changed! " + JSON.stringify(event) );
+						console.log("Youtube state changed! " );
 					}
 				}
         </script>

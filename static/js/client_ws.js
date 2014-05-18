@@ -198,11 +198,15 @@
 			if(url.title || url.summary){ //if the website exists
 				
 				$('#url').val(url.url);
-				/*$('#urlTitle').val(url.title);
+				$('#urlTitle').val(url.title);
 				$('#urlSummary').val(url.summary);
 				$('#urlThumbnail').val(url.thumbnail);
-				*/
-				message.url = url;
+				
+				message.url = url.url;
+				message.url_title = url.title;
+				message.url_summary = url.summary;
+				message.url_thumbnail = url.thumbnail;
+				
 				message.type = "4";
 				localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				

@@ -81,12 +81,10 @@
 			
 			
 			<input type="hidden" name="videoId" id="videoId" value="" />
-			<!--
 			<input type="hidden" name="url" id="url" />
 			<input type="hidden" name="urlTitle" id="urlTitle" />
 			<input type="hidden" name="urlSummary" id="urlSummary" />
 			<input type="hidden" name="urlThumbnail" id="urlThumbnail" />
-			-->
 			
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
 		</form>
@@ -522,12 +520,23 @@
 		//var url = JSON.parse(localStorage.getItem('url'));
 		if(message.url!=null){
 			message.url = null;
-			localStorage.setItem('allMessage', JSON.stringify(allMessage));
+			message.url_title = null;
+			message.url_thumbnail = null;
+			message.url_summary = null;
 		}
 	    // Update UI
+		$('#url').val("");
+			$('#urlTitle').val("");
+			$('#urlSummary').val("");
+			$('#urlThumbnail').val("");
 	    $('#linkPreview').css('padding','0%');
 	    $('#linkPreview').css('border','0');
     	$(this).parent().children().remove();
+		$('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
+		$('#type').selectmenu("refresh", true);
+		message.type = "1";
+		localStorage.setItem('allMessage', JSON.stringify(allMessage));
+		Create.updateMsg();
    	});
    	
    	
@@ -641,6 +650,10 @@
 			$('#linkPreview').children().remove();
 			//clear all the text
 			$('#textContent').val("");
+			$('#url').val("");
+			$('#urlTitle').val("");
+			$('#urlSummary').val("");
+			$('#urlThumbnail').val("");
 			
 			if(message.img != null){
 				var uploadedImgLength = message.img.length;
@@ -691,13 +704,18 @@
 			if(message.url){ //if it is an url, ask server side to scrape the url
 				//append the information to the link preview div
 				var holder = $("#linkPreview");
+				$('#url').val(message.url);
+				$('#urlTitle').val(message.url_title);
+				$('#urlSummary').val(url_summary);
+				$('#urlThumbnail').val(url_thumbnail);
+				
 				holder.append('<button class="btn btn-link removeYoutube">&times;</button>');
-				if(message.url.thumbnail){
-					holder.append('<div class="thumbnailHolder"><img class="urlThumbnail" src="'+ message.url.thumbnail +'" /></div>');
+				if(message.url_thumbnail){
+					holder.append('<div class="thumbnailHolder"><img class="urlThumbnail" src="'+ message.url_thumbnail +'" /></div>');
 				}
-				holder.append('<div class="urlTitle"><h5><a target="_blank" href="'+ message.url.url +'">' + message.url.title + '</a></h5></div>');
-				if(message.url.summary){
-					holder.append('<div class="urlDescription">'+message.url.summary+'</div>');
+				holder.append('<div class="urlTitle"><h5><a target="_blank" href="'+ message.url_url +'">' + message.url_title + '</a></h5></div>');
+				if(message.url_summary){
+					holder.append('<div class="urlDescription">'+message.url_summary+'</div>');
 				}
 				// Update UI
 				$('#linkPreview').css('padding','2%');
@@ -761,6 +779,10 @@
 		var imgList = $('#imgList');
 		var videoList = $('#videoList');
 		$('#textContent').val("");
+		$('#url').val("");
+		$('#urlTitle').val("");
+		$('#urlSummary').val("");
+		$('#urlThumbnail').val("");
 		$("#textContent").prop("disabled", true);
 		
 		imgList.empty();

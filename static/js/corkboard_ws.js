@@ -131,6 +131,7 @@
 			notepaperInner = [];
 			
 			if(youtubeMatch){
+				console.log("fuck you");
 				players[iframeId] = new YT.Player(iframeId, {
 					events: { 'onStateChange': onPlayerStateChange}
 				});
@@ -141,8 +142,8 @@
 		},
 		
 		clear : function(notepaper){
-			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).html("");
-			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).remove();
+			$('#note-'+notepaper.id).find('.content-container#msg-'+notepaper.msgId).html("");
+			$('#note-'+notepaper.id).find('.content-container#msg-'+notepaper.msgId).remove();
 			//$('#note-'+notepaper.notepaperId).css('background-color','#FFF');
 			
 		}
