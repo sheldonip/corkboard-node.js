@@ -23,6 +23,8 @@ var connection = mysql.createConnection({
   charset  : 'utf8'
 });
 
+var messages = [];
+
 server.listen(8888);
 
 io.sockets.on('connection', function (socket) {
@@ -52,9 +54,9 @@ io.sockets.on('connection', function (socket) {
 	socket.on('fetchAllNotepapers', function (data) {
 		var notepapers = {};	
 		console.log('[DEBUG] fetchAllNotepapers');
-	
+		
 		// Use the connection
-		connection.query('SELECT * FROM message M, notepaper N WHERE M.id = N.message_id', function(err, rows){	
+		connection.query('SELECT id AS msgId, content, notepaper_id AS id, bgcolor, img, video, url, url_title, url_summary, url_thumbnail FROM message', function(err, rows){	
 			if (err) throw err;
 			// return JSON response
 			socket.emit('updateMsg', rows);
@@ -66,6 +68,10 @@ io.sockets.on('connection', function (socket) {
 	//forward the message to the corkboard
 	socket.on('updateMsg', function (data) {
 		io.sockets.emit('updateMsg', data);
+		//messages[data.msgId] = JSON.stringify(data);
+		var query2 = connection.query('UPDATE message SET type = ?, content = ?, notepaper_id = ?, bgcolor = ?, img = ?, video = ?, url = ?, url_title = ?, url_summary = ?, url_thumbnail = ? WHERE id = ?', [data[0].type, data[0].content, data[0].id, data[0].bgcolor, JSON.stringify(data[0].img), data[0].video, data[0].url, data[0].url_title, data[0].url_summary, data[0].url_thumbnail, data[0].msgId], function(err2, result2) {
+			console.log(query2.sql);
+		});
 	});
 	
 	
@@ -86,7 +92,7 @@ io.sockets.on('connection', function (socket) {
 					preview.thumbnail = youtubeObject.data.thumbnail.sqDefault;
 					preview.title = youtubeObject.data.title;
 					preview.summary = youtubeObject.data.description.substr(0, 100);
-					preview.duration = parseInt(youtubeObject.data.duration);
+					//preview.duration = parseInt(youtubeObject.data.duration);
 					preview.url = url;
 					socket.emit('scrapeUrlResult', preview);
 				}
@@ -139,9 +145,10 @@ io.sockets.on('connection', function (socket) {
 	socket.on('occupyNotepaper', function (data) {
 		console.log('[DEBUG] emptyMessages');
 		var msgId, notepaperId;
-		connection.query('SELECT notepaper_id, COUNT(*) AS numberOfMsg FROM message GROUP BY notepaper_id ORDER BY numberOfMsg LIMIT 1;', function(err, rows) {
+		connection.query('SELECT N.id, COUNT(M.id) AS numberOfMsg FROM notepaper N LEFT JOIN message M ON N.id = M.notepaper_id GROUP BY N.id ORDER BY numberOfMsg, N.id LIMIT 1;', function(err, rows) {
 			// return JSON response
-				notepaperId = rows[0].notepaper_id;
+				console.log('notepaper_id: '+notepaperId);
+				notepaperId = rows[0].id;
 				var message  = {type: 1, notepaper_id: notepaperId};
 				connection.query('INSERT INTO message SET ?', message, function(err, result) {
 					msgId = result.insertId;
@@ -185,6 +192,15 @@ io.sockets.on('connection', function (socket) {
 			socket.emit('queryPositionsHandler', objToJson);
 		});
 		
+	});
+	
+	//forward the message to the corkboard
+	socket.on('delMsg', function (data) {
+		console.log('delMsg: '+data.msgId);
+		io.sockets.emit('clearMsg', data);
+		var query2 = connection.query('DELETE FROM message WHERE id = ?', [data.msgId], function(err2, result2) {
+			console.log(query2.sql);
+		});
 	});
 	
 });
@@ -277,7 +293,8 @@ app.get('/process/resetNotepapers', function (req, res) {
 app.post('/upload/uploadgallery', function (req, res) {
 	var objToJson = {};
     fs.readFile(req.files.messageImg.path, function (err, data) {	
-		var imageName = req.files.messageImg.name;
+		var rnd = Math.round(new Date().getTime() / 1000) + "-" + Math.floor(Math.random() * 2147)
+		var imageName = rnd + req.files.messageImg.name;
 
 		// If there's an error
 		if(!imageName){
@@ -452,3 +469,19 @@ function getExtension(filename) {
     var i = filename.lastIndexOf('.');
     return (i < 0) ? '' : filename.substr(i+1);
 }
+
+/*
+setInterval(function() {
+	var msgLength = messages.length;
+	var msgItem;
+	console.log("msg " + JSON.stringify(messages) );
+	for (var i = 0; i < msgLength; i++){
+		if(messages[i] != null){
+			msgItem = JSON.parse(messages[i]);
+			var query2 = connection.query('UPDATE message SET type = ?, content = ?, notepaper_id = ?, bgcolor = ?, img = ?, video = ?, url = ?, url_title = ?, url_summary = ?, url_thumbnail = ? WHERE id = ?', [msgItem.type, msgItem.content, msgItem.id, msgItem.bgcolor, JSON.stringify(msgItem.img), msgItem.video, msgItem.url, msgItem.url_title, msgItem.url_summary, msgItem.url_thumbnail, msgItem.msgId], function(err2, result2) {
+				console.log(query2.sql);
+			});
+		}
+	}
+}, 5000);
+*/
