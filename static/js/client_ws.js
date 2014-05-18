@@ -89,6 +89,7 @@
 			//console.log('update '+content);
 			
 			var url = $('#url').val();
+			console.log(url);
 			var url_title = $('#urlTitle').val();
 			var url_summary = $('#urlSummary').val();
 			var url_thumbnail = $('#urlThumbnail').val();
@@ -103,23 +104,29 @@
 			}
 			// Prepare the content
 			if(msg.type==1){
-			
+				// Send msg
+				this.socket.emit('updateMsg', [msg]);
 			}
 			else if(msg.type==3){ //Gallery
 				msg.img = img;
+				// Send msg
+				this.socket.emit('updateMsg', [msg]);
 			} else if(msg.type==4){ //Url
 				msg.url = url;
 				msg.url_title = url_title;
 				msg.url_summary = url_summary;
 				msg.url_thumbnail = url_thumbnail;
+				// Send msg
+				this.socket.emit('updateMsg', [msg]);
 			} else if(msg.type==5){ //Video
 				msg.video = video;
+				// Send msg
+				this.socket.emit('updateMsg', [msg]);
 			} else {
 				console.log('Invalid type');
 				return false;
 			}
-			// Send msg
-			this.socket.emit('updateMsg', [msg]);
+			
 			
 			return false;
 		},
@@ -189,9 +196,9 @@
 		
 		scrapeUrlResult: function(url) {
 			if(url.title || url.summary){ //if the website exists
-				/*
+				
 				$('#url').val(url.url);
-				$('#urlTitle').val(url.title);
+				/*$('#urlTitle').val(url.title);
 				$('#urlSummary').val(url.summary);
 				$('#urlThumbnail').val(url.thumbnail);
 				*/
