@@ -91,7 +91,7 @@ io.sockets.on('connection', function (socket) {
 					var youtubeObject = JSON.parse(body);
 					preview.thumbnail = youtubeObject.data.thumbnail.sqDefault;
 					preview.title = youtubeObject.data.title;
-					preview.summary = youtubeObject.data.description.substr(0, 100);
+					preview.summary = youtubeObject.data.description.substr(0, 50);
 					//preview.duration = parseInt(youtubeObject.data.duration);
 					preview.url = url;
 					socket.emit('scrapeUrlResult', preview);
@@ -168,7 +168,7 @@ io.sockets.on('connection', function (socket) {
 				}
 
 				//signal the corkboard to clear the original notepaper
-				io.sockets.emit('clearMsg', { notepaperId : parseInt(data.oldNotepaperId), msgId : parseInt(data.messageId) });
+				io.sockets.emit('clearMsg', { id : parseInt(data.oldNotepaperId), msgId : parseInt(data.messageId) });
 				socket.emit('changePositionSuccess', data);
 
 		});		
