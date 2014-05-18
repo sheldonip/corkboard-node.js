@@ -141,8 +141,8 @@
 		},
 		
 		clear : function(notepaper){
-			$('#note-'+notepaper.id).find('.content-container#msg-'+notepaper.msgId).html("");
-			$('#note-'+notepaper.id).find('.content-container#msg-'+notepaper.msgId).remove();
+			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).html("");
+			$('#note-'+notepaper.notepaperId).find('.content-container#msg-'+notepaper.msgId).remove();
 			//$('#note-'+notepaper.notepaperId).css('background-color','#FFF');
 			
 		}
