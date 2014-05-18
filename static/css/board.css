@@ -63,8 +63,8 @@ div.frame{
     *width: 550px;
     *width: 445px;
     height: 98%;
-    width: 97%;
-	margin-left: 1.5%;
+    width: 90%;
+	margin-left: 4%;
 	*min-width: 160px;
 	*min-height: 280px;
 	background-color: #FFF780;
@@ -87,6 +87,10 @@ div.frame{
 	clear: both;
 }
 
+#first-row{
+	margin-top: 2%;
+}
+
 .note-grid{
 	width: 25%;
 	height: 100%;
@@ -104,6 +108,10 @@ div.frame{
 	height: 100%;
 	float: left;
 	position: relative;
+}
+
+#qrcode img{
+	margin-left: 3%;
 }
 
 .qr-label{

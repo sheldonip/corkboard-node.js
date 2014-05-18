@@ -13,7 +13,7 @@
         <div class="main-wrapper">
         	
             <!-- Fetch each notepaper from notepaper table --> 
-			<div class="note-row">
+			<div class="note-row" id="first-row">
 			<div class="note-grid">
 			<a id="note-1" class="note note-white">
 				<div class="pin"></div>
@@ -204,7 +204,7 @@
                 }, 3000);
 
 				// QR code
-				var QRHeight = $('#note-9').height();
+				var QRHeight = $('#note-9').height()* 0.7;
 				
 				new QRCode(document.getElementById("qrcode"), {
 					text: base_url+"message/create",
