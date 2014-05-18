@@ -92,7 +92,6 @@
 			var url_title = $('#urlTitle').val();
 			var url_summary = $('#urlSummary').val();
 			var url_thumbnail = $('#urlThumbnail').val();
-			var url_duration = $('#urlDuration').val();
 			var img = message.img;
 			var video = message.video;
 			//var img = JSON.parse(localStorage.getItem('img'));
@@ -113,7 +112,6 @@
 				msg.url_title = url_title;
 				msg.url_summary = url_summary;
 				msg.url_thumbnail = url_thumbnail;
-				msg.url_duration = url_duration;
 			} else if(msg.type==5){ //Video
 				msg.video = video;
 			} else {
@@ -132,6 +130,8 @@
 			msg.id = parseInt($('#notepaperId').val());
 			msg.type = parseInt($('#type').val());
 			msg.content = $('#textContent').val();
+			msg.msgId = parseInt($('#messageId').val());
+			msg.bgcolor = $('#colors-holder > .color-thumb-container > .active').attr('value');
 			//console.log('update '+content);
 			
 			var url = $('#url').val();
@@ -174,6 +174,14 @@
 			return false;
 		},
 		
+		//save message to mysql db
+		delMsg : function(msg) {			
+			//send save message
+			this.socket.emit('delMsg', msg);
+			
+			return false;
+		},
+		
 		//Ask the server side to scrape the url
 		scrapeUrl: function(url) {
 			this.socket.emit('scrapeUrl', url);
@@ -181,12 +189,14 @@
 		
 		scrapeUrlResult: function(url) {
 			if(url.title || url.summary){ //if the website exists
+				/*
 				$('#url').val(url.url);
 				$('#urlTitle').val(url.title);
 				$('#urlSummary').val(url.summary);
 				$('#urlThumbnail').val(url.thumbnail);
-				$('#urlDuration').val(url.duration);
+				*/
 				message.url = url;
+				message.type = "4";
 				localStorage.setItem('allMessage', JSON.stringify(allMessage));
 				
 				//append the information to the link preview div
@@ -226,6 +236,7 @@
 			$('#messageId').val(notepaper.messageId);
 			message.messageId = notepaper.messageId;
 			localStorage.setItem('allMessage', JSON.stringify(allMessage));
+			$("#textContent").prop("disabled", false);
 			Create.updateMsg();
 		},
 		

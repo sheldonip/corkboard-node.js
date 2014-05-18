@@ -58,7 +58,7 @@
 		
 		<form id="msgForm" action="/index.php/message/update" role="form" method="post" accept-charset="utf-8">
 			<div class="form-group">
-				<textarea class="form-control" id="textContent" name="content" rows="3" required></textarea>
+				<textarea class="form-control" id="textContent" name="content" rows="3"></textarea>
 			</div>
 			<div id="linkPreview"></div>
 			<div class="content-container">
@@ -76,14 +76,17 @@
 				</select>
             </div>
 			<input type="hidden" name="id" id="" value="" />
+			<input type="hidden" name="messageId" id="messageId" value="" />
+			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
+			
+			<!--
 			<input type="hidden" name="videoId" id="videoId" value="" />
 			<input type="hidden" name="url" id="url" />
 			<input type="hidden" name="urlTitle" id="urlTitle" />
 			<input type="hidden" name="urlSummary" id="urlSummary" />
 			<input type="hidden" name="urlThumbnail" id="urlThumbnail" />
-			<input type="hidden" name="urlDuration" id="urlDuration" />
-			<input type="hidden" name="notepaperId" id="notepaperId" value="" />
-			<input type="hidden" name="messageId" id="messageId" value="" />
+			-->
+			
 			<!-- <input type="hidden" name="?php echo $this -> security -> get_csrf_token_name(); ?>" value="?php echo $this -> security -> get_csrf_hash(); ?>" /> -->
 		</form>
 		
@@ -235,7 +238,7 @@
 		</div>
 		
 		<div role="main" class="ui-content">
-			<ul id="messageList" data-role="listview">
+			<ul id="messageList" class="touch" data-role="listview" data-icon="false" data-split-icon="delete" data-split-theme>
 				
 			</ul>
 		</div>
@@ -278,8 +281,12 @@
 			if(allMessage == null){
 				allMessage = [];
 			}
-			
+			$("#textContent").prop("disabled", true)
 			message = {};
+			message.type = "1";
+            $('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
+			$('#type').selectmenu("refresh", true);
+
 			message.bgcolor = "#FFFFFF"; //initialize the bgcolor to white
 			allMessage[allMessage.length] = message;
 						
@@ -385,6 +392,7 @@
                             $('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
 							$('#type').selectmenu("refresh", true);
                             $('#my-progress').hide();
+							message.type = "3";
 							
 							//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
 							if(message.img == null){
@@ -437,6 +445,7 @@
 								$('#type').selectmenu("refresh", true);
 								$('#my-progress').hide();
 								$('#uploadVideoBtn').hide();
+								message.type = "5";
 								
 								//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
 								if(message.video == null){
@@ -474,6 +483,7 @@
 				// Change option
 				$('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
 				$('#type').selectmenu("refresh", true);
+				message.type = "1";
 				Create.updateMsg();
 			}
     	
@@ -498,6 +508,7 @@
 			$('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
 			$('#type').selectmenu("refresh", true);
 			Create.updateMsg();
+			message.type = "1";
     		console.log("remove.");
     		$('#uploadVideoBtn').show();
     	
@@ -551,6 +562,7 @@
 					// Change option
 					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
 					$('#type').selectmenu("refresh", true);
+					message.type = "3";
 					canvasData = "";
 						//If the user has not uploaded any picture yet, create a local storage to store the names of the uploaded image
 							if(message.img == null){
@@ -617,42 +629,34 @@
 		//see if an ID is provided
 		message = allMessage[messageOrder];
 		
-		//Fetch all the uploaded image thumbnails
+			//Fetch all the uploaded image and video thumbnails
 			var imgList = $('#imgList');
 			imgList.empty();
+			var videoList = $('#videoList');
+			videoList.empty();
+			//remove link preview
+			$('#linkPreview').css('padding','0%');
+			$('#linkPreview').css('border','0');
+			$('#linkPreview').children().remove();
+			//clear all the text
+			$('#textContent').val("");
+			
 			if(message.img != null){
 				var uploadedImgLength = message.img.length;
 				for(var i=0; i < uploadedImgLength; i++){
 					imgList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/thumbnail/'+ message.img[i] +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+message.img[i]+'" /></li>');
 				}
-				if(uploadedImgLength > 0){
-					// Change option
-					$('#type').val("3").attr('selected', true).siblings('option').removeAttr('selected');
-					$('#type').selectmenu("refresh", true);
-				}
 			}
 			//Fetch all the uploaded video thumbnails
-			var videoList = $('#videoList');
-			videoList.empty();
+			
 			if(message.video != null){
 				var uploadedVideoLength = message.video.length;
 				for(var i=0; i < uploadedVideoLength; i++){
 					videoList.append('<li class="image"><a class="removeThumbnail" href="#">&times;</a><div class="uThumbnail" style="background-image: url('+ base_url +'uploads/video/'+ message.video[i].replace('.mp4','.jpg') +');"></div><input type="hidden" name="url[]" class="imgUrl" value="'+message.video[i]+'" /></li>');
 				}
-				if(uploadedVideoLength > 0){
-					$('#uploadVideoBtn').hide();
-					// Change option
-					$('#type').val("5").attr('selected', true).siblings('option').removeAttr('selected');
-					$('#type').selectmenu("refresh", true);
-				}
 			}
 			
-			//remove link preview
-			$('#linkPreview').css('padding','0%');
-			$('#linkPreview').css('border','0');
-			$('#linkPreview').children().remove();
-						
-			$('#textContent').val("");
+			
 			if(message.text!=null){ //Fetch message.text from local storage
 				$('#textContent').val(message.text); 
 			}
@@ -702,6 +706,30 @@
 	});
 	
 	
+	$('body').on('click', '.delete', function(evt) {
+			evt.preventDefault();
+			var listitem = $( this ).siblings('.listItem');
+			var messageOrder = listitem.attr('messageOrder');
+			console.log("msgorder: "+messageOrder);
+			Create.delMsg( {id: allMessage[messageOrder].notepaperId, msgId: allMessage[messageOrder].messageId} );
+            //listitem.remove();
+			allMessage.splice(messageOrder, 1);
+			var numberOfMessage = allMessage.length;
+			var listItems = [];
+			for(var i = 0; i < numberOfMessage; i++){
+				listItems.push('<li>');
+				listItems.push('<a href="#post" class="listItem" messageOrder="'+ i +'">');
+				listItems.push(allMessage[i].text);
+				listItems.push('</a><a href="#" class="delete">Delete</a></li>');
+			}
+			$('#messageList').html(listItems.join(''));
+			$("#messageList").listview("refresh");
+			
+			localStorage.setItem('allMessage', JSON.stringify(allMessage));
+			
+
+     });
+	
 	$(document).on('pagecontainershow', function(e, ui) {
 	
 		var thisPage = $(':mobile-pagecontainer').pagecontainer('getActivePage').attr('id');
@@ -709,9 +737,10 @@
 			var numberOfMessage = allMessage.length;
 			var listItems = [];
 			for(var i = 0; i < numberOfMessage; i++){
-				listItems.push('<li><a href="#post" class="listItem" messageOrder="'+ i +'">');
+				listItems.push('<li>');
+				listItems.push('<a href="#post" class="listItem" messageOrder="'+ i +'">');
 				listItems.push(allMessage[i].text);
-				listItems.push('</a></li>');
+				listItems.push('</a><a href="#" class="delete">Delete</a></li>');
 			}
 			$('#messageList').html(listItems.join(''));
 			$("#messageList").listview("refresh");
@@ -722,6 +751,7 @@
 	$(".menuBtn").on("click", function(event ) {
 		message.text = $('#textContent').val();
 		localStorage.setItem('allMessage', JSON.stringify(allMessage));
+		
 	});
 	
 	$(".addNewMsgBtn").on("click", function(event ) {
@@ -730,6 +760,8 @@
 		var imgList = $('#imgList');
 		var videoList = $('#videoList');
 		$('#textContent').val("");
+		$("#textContent").prop("disabled", true);
+		
 		imgList.empty();
 		videoList.empty();
 		//remove link preview
@@ -744,7 +776,7 @@
 		$('div.color-thumb[value=\'#FFFFFF\']').addClass('active'); 
 		$('#uploadVideoBtn').show();
 		
-		// Change option
+		// initalize option
         $('#type').val("1").attr('selected', true).siblings('option').removeAttr('selected');
 		$('#type').selectmenu("refresh", true);
 		message = {};
@@ -768,8 +800,10 @@
 			$('a.ui-btn-active').removeClass('ui-btn-active');
 		},200);
 	});
-
 	
+	$('#type').change(function(){		
+		message.type = $(this).val();
+	});
 	
 	</script>
 	<script src="/js/client_ws.js"></script>

@@ -348,6 +348,47 @@ div.tools{
 }
 
 /**************************/
+/* Listview */
+/**************************/
+/* Left transition */
+li.ui-li.left {
+    -webkit-transition: -webkit-transform 250ms ease;
+    -webkit-transform: translateX(-100%);
+    -moz-transition: -moz-transform 250ms ease;
+    -moz-transform: translateX(-100%);
+    -o-transition: -o-transform 250ms ease;
+    -o-transform: translateX(-100%);
+    transition: transform 250ms ease;
+    transform: translateX(-100%);
+    border-top-width: 0; /* We switch to border bottom on previous list item */
+    border-right-width: 1px;
+}
+/* Right transition */
+li.ui-li.right {
+    -webkit-transition: -webkit-transform 250ms ease;
+    -webkit-transform: translateX(100%);
+    -moz-transition: -moz-transform 250ms ease;
+    -moz-transform: translateX(100%);
+    -o-transition: -o-transform 250ms ease;
+    -o-transform: translateX(100%);
+    transition: transform 250ms ease;
+    transform: translateX(100%);
+    border-top-width: 0; /* We switch to border bottom on previous list item */
+    border-left-width: 1px;
+}
+/* Border bottom for the previous list item during the transition*/
+li.ui-li.border {
+    border-bottom-width: 1px;
+}
+/* Hide the delete button on touch devices */
+.touch .delete {
+    display: none;
+}
+.touch .ui-link-inherit {
+    padding-right: 15px !important;
+}
+
+/**************************/
 /* Override JQuery mobile */
 /**************************/
 .ui-page-theme-a{
